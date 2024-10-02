@@ -45,7 +45,7 @@ class GeneticAlgorithmTorch:
                     if p < 0.02:
                         self.population[self.pop_size + i, index] = random.uniform(0, pop_max)
             self.vals = self.lower.eval(self.population)
-            fitness_order = np.argsort(-self.vals)
+            fitness_order = np.argsort(-self.vals.to('cpu'))
             self.population = self.population[fitness_order]
             self.vals = self.vals[fitness_order]
             print(self.vals[0])
