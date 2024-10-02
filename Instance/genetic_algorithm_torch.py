@@ -16,6 +16,8 @@ class GeneticAlgorithmTorch:
         self.instance = instance
         self.n_paths = self.instance.n_paths
 
+
+
         self.pop_size = pop_size
         self.n_children = int(pop_size * offspring_proportion)
         self.mat_size = self.pop_size + self.n_children
