@@ -18,13 +18,15 @@ class GeneticAlgorithm:
         self.scale_factor = scale_factor
 
         self.population = np.zeros((self.mat_size, self.n_paths))
-        self.population[:self.pop_size, :self.n_paths] = np.random.uniform(size=(self.pop_size, self.n_paths))
+        self.population[:self.pop_size, :self.n_paths] = np.random.uniform(size=(self.pop_size, self.n_paths))*self.scale_factor
 
         self.vals = np.zeros(self.mat_size)
+        self.p = [[] for _ in range(self.mat_size)]
 
         self.lower = Lower(self.instance, lower_eps)
         for i in range(self.pop_size):
-            self.vals[i] = self.lower.eval(self.population[i])
+            self.vals[i], p = self.lower.eval(self.population[i])
+            self.p[i] = p
 
     def run(self, iterations):
         for _ in range(iterations):
@@ -38,10 +40,14 @@ class GeneticAlgorithm:
                     p = random.random()
                     if p < 0.02:
                         self.population[self.pop_size + i, index] = random.uniform(0, pop_max)
-                self.vals[self.pop_size + i] = self.lower.eval(self.population[self.pop_size + i])
+                self.vals[self.pop_size + i], pp = self.lower.eval(self.population[self.pop_size + i])
+                self.p[self.pop_size + i] = pp
+
             fitness_order = np.argsort(-self.vals)
             self.population = self.population[fitness_order]
+            self.p = [self.p[i] for i in fitness_order]
             self.vals = self.vals[fitness_order]
             print(self.vals[0])
-        print('costs =\n', self.population[0] * self.scale_factor)
+        print('costs =\n', self.population[0] )
+        print(self.p[0])
         print('fitness =\n', self.vals[0])

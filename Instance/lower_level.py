@@ -58,4 +58,4 @@ class Lower:
 
     def eval(self, T):
         probs = self.compute_probs(T)
-        return self.compute_fitness(probs)
+        return self.compute_fitness(probs), probs
