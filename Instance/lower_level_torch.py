@@ -29,13 +29,13 @@ class LowerTorch:
         self.eps = eps
 
     def compute_probs(self, T):
-        T = torch.tensor(T).to(self.device).unsqueeze(1)
+        T = torch.tensor(T).to(self.device).unsqueeze(1).to(self.device)
         T = torch.repeat_interleave(T, repeats=self.n_od, dim=1)
 
         self.costs[:, :, : -1] = T
 
         # initial probabilities
-        p_old = torch.ones((self.n_od, self.total_paths)) / self.total_paths
+        p_old = torch.ones((self.n_od, self.total_paths), device=self.device) / self.total_paths
         p_old = torch.repeat_interleave(p_old.unsqueeze(0), repeats=self.mat_size, dim=0)
         p_new = p_old
 
