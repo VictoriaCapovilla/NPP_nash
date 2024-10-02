@@ -21,10 +21,10 @@ class GeneticAlgorithmTorch:
         self.mat_size = self.pop_size + self.n_children
         self.scale_factor = scale_factor
 
-        self.population = np.zeros((self.mat_size, self.n_paths))
-        self.population[:self.pop_size, :self.n_paths] = np.random.uniform(size=(self.pop_size, self.n_paths))
+        # TO DO calcolare max per la distribuzione prezzi
+        self.population= torch.rand(size=(self.mat_size, self.n_paths), device= self.device)
 
-        self.vals = np.zeros(self.mat_size)
+        self.vals = torch.zeros(self.mat_size, device=self.device)
 
         self.lower = LowerTorch(self.instance, lower_eps, mat_size=self.mat_size)
         # for i in range(self.pop_size):
