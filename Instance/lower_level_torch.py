@@ -6,11 +6,11 @@ from Instance.instance import Instance
 
 class LowerTorch:
 
-    def __init__(self, instance: Instance, eps, mat_size):
+    def __init__(self, instance: Instance, eps, mat_size, device):
 
 
         # set require grad False
-        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        self.device = device
         self.mat_size = mat_size
         self.tfp_costs = torch.tensor(instance.tfp_costs).to(self.device)
         self.n_od = instance.n_od
@@ -29,8 +29,8 @@ class LowerTorch:
         self.eps = eps
 
     def compute_probs(self, T):
-        T = torch.tensor(T).to(self.device).unsqueeze(1).to(self.device)
-        T = torch.repeat_interleave(T, repeats=self.n_od, dim=1)
+        # T = torch.tensor(T).to(self.device).unsqueeze(1).to(self.device)
+        T = torch.repeat_interleave(T.unsqueeze(1), repeats=self.n_od, dim=1)
 
         self.costs[:, :, : -1] = T
 
