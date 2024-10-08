@@ -26,7 +26,8 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 t = time.time()
 instance = Instance(n_paths=PATHS, n_od=N_OD)  # n_path = available toll-paths
-genetic_algorithm = GeneticAlgorithmTorch(instance, POP_SIZE, lower_eps=LOWER_EPS, offspring_proportion=OFFSPRING_RATE, device = device)
+genetic_algorithm = GeneticAlgorithmTorch(instance, POP_SIZE, lower_eps=LOWER_EPS, offspring_proportion=OFFSPRING_RATE,
+                                          device=device)
 genetic_algorithm.run(ITERATIONS)
 
 print(time.time() - t)

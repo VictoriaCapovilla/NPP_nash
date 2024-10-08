@@ -8,7 +8,6 @@ class LowerTorch:
 
     def __init__(self, instance: Instance, eps, mat_size, device):
 
-
         # set require grad False
         self.device = device
         self.mat_size = mat_size
@@ -25,7 +24,6 @@ class LowerTorch:
         self.costs[:, -1] = torch.tensor(instance.tfp_costs).to(self.device)
         self.costs = torch.repeat_interleave(self.costs.unsqueeze(0), repeats=mat_size, dim=0)
 
-
         self.eps = eps
 
     def compute_probs(self, T):
@@ -41,12 +39,8 @@ class LowerTorch:
 
         # payoff we want to maximize
         prod = self.n_users * p_old
-        # a = prod.sum(dim=1).unsqueeze(1)
-        # a = torch.repeat_interleave(a, repeats=self.n_od, dim=1)
-        # m_old = self.K - self.costs - a
-
         m_old = self.K - self.costs - torch.repeat_interleave(prod.sum(dim=1).unsqueeze(1), repeats=self.n_od, dim=1)
-        m_old[:, :, -1] = self.K - self.costs[:, :, -1] - prod[:, :, -1]  # toll-free paths payoffs: they differ bcs the toll-free paths are different bwn ODs
+        m_old[:, :, -1] = self.K - self.costs[:, :, -1] - prod[:, :, -1]
         m_new = m_old
 
         star = False
@@ -59,18 +53,18 @@ class LowerTorch:
             # average payoff
             m_average = (m_old * p_old).sum(dim=2).unsqueeze(2)
             m_average = torch.repeat_interleave(m_average, repeats=p_old.shape[2], dim=2)
+
             # updated probabilities
             p_new = p_old * m_old / m_average
             p_old = p_new
 
             # updated payoff
             prod = self.n_users * p_old
-
-            a = prod.sum(dim=1).unsqueeze(1)
-            a = torch.repeat_interleave(a, repeats=self.n_od, dim=1)
-            m_new = self.K - self.costs - a
-            m_new[:, :, -1] = self.K - self.costs[:, :, -1] - prod[:, :,
-                                                              -1]  # toll-free paths payoffs: they differ bcs the toll-free paths are different bwn ODs
+            # a = prod.sum(dim=1).unsqueeze(1)
+            # a = torch.repeat_interleave(a, repeats=self.n_od, dim=1)
+            # m_new = self.K - self.costs - a
+            m_new = self.K - self.costs - torch.repeat_interleave(prod.sum(dim=1).unsqueeze(1), repeats=self.n_od, dim=1)
+            m_new[:, :, -1] = self.K - self.costs[:, :, -1] - prod[:, :, -1]
             m_new = m_old
 
         return p_old

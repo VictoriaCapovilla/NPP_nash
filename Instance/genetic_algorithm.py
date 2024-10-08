@@ -48,6 +48,6 @@ class GeneticAlgorithm:
             self.p = [self.p[i] for i in fitness_order]
             self.vals = self.vals[fitness_order]
             print(self.vals[0])
-        print('costs =\n', self.population[0] )
-        print(self.p[0])
+        print('costs =\n', self.population[0])
+        print('probability for each od-pair =\n', self.p[0])
         print('fitness =\n', self.vals[0])

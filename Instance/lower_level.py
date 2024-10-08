@@ -24,10 +24,10 @@ class Lower:
         p_new = p_old
 
         # payoff we want to maximize
+        # note that toll-free paths payoffs differ bcs the initial costs are different bwn ODs:
         prod = self.n_users * p_old
-        a = prod.sum(axis=0)
         m_old = self.K - self.costs - prod.sum(axis=0)
-        m_old[:, -1] = self.K - self.costs[:, -1] - prod[:, -1]  # toll-free paths payoffs: they differ bcs the toll-free paths are different bwn ODs
+        m_old[:, -1] = self.K - self.costs[:, -1] - prod[:, -1]
         m_new = m_old
 
         star = False
