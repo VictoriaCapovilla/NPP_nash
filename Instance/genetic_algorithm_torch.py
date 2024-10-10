@@ -3,14 +3,13 @@ import random
 
 import torch
 
-from Instance.lower_level import Lower
 from Instance.lower_level_torch import LowerTorch
 
 
 class GeneticAlgorithmTorch:
 
     def __init__(self, instance, pop_size, offspring_proportion=0.5, tp_costs=None, tfp_costs=None, costs=None,
-                 scale_factor=100, lower_eps=10**(-12), device=None):
+                 lower_eps=10**(-12), device=None):
 
         self.device = device
         self.instance = instance
@@ -20,10 +19,10 @@ class GeneticAlgorithmTorch:
         self.n_children = int(pop_size * offspring_proportion)
         self.mat_size = self.pop_size + self.n_children
 
-        self.scale_factor = scale_factor
-        self.M = self.scale_factor
+        self.tfp_costs = self.instance.tfp_costs
+        self.n_users = self.instance.n_users
+        self.M = (self.tfp_costs + self.n_users).max()
 
-        # TO DO calcolare max per la distribuzione prezzi
         self.population = torch.rand(size=(self.mat_size, self.n_paths), device=self.device) * self.M
         self.parents_idxs = torch.tensor([(i, j) for j in range(self.pop_size) for i in range(j + 1, self.pop_size)],
                                  device=self.device)
@@ -66,8 +65,5 @@ class GeneticAlgorithmTorch:
             self.vals = self.vals[fitness_order]
             # print(self.vals[0])
 
-        print('costs =\n', self.population[0] * self.scale_factor)
-        # toglierei da qui scale_factor e terrei solo self.M in alto
-        # eliminare dal codice uno dei due
-        # scale_factor usato solo qui
+        print('costs =\n', self.population[0])
         print('fitness =\n', self.vals[0])
