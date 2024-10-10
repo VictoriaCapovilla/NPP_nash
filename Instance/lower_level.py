@@ -5,7 +5,7 @@ from Instance.instance import Instance
 
 class Lower:
 
-    def __init__(self, instance: Instance, eps):
+    def __init__(self, instance: Instance, eps, parameters):
         self.tfp_costs = instance.tfp_costs
         self.n_od = instance.n_od
         self.total_paths = instance.n_paths + 1
@@ -14,6 +14,24 @@ class Lower:
         self.costs[:, -1] = instance.tfp_costs
         self.K = (self.tfp_costs + self.n_users[:, 0]).max() + self.n_users[:, 0].sum()
         self.eps = eps
+        self.parameters = parameters
+
+    def function(self, parameters, p_old):
+        prod = self.n_users * p_old
+        if self.parameters is None:
+            m_old = self.K - self.costs - prod.sum(axis=0)
+            m_old[:, -1] = self.K - self.costs[:, -1] - prod[:, -1]
+        else:
+            alpha, beta = self.parameters
+            # delta = np.ones(self.costs.shape)
+            # for i in range(self.n_od):
+            #     for j in range(self.total_paths):
+            #         if self.costs[i, j] is 0:
+            #             delta[i, j] = 0
+
+            m_old = self.K - self.costs - alpha * (prod.sum(axis=0) ** beta)
+            m_old[:, -1] = self.K - self.costs[:, -1] - alpha * (prod[:, -1] ** beta)
+        return m_old
 
     def compute_probs(self, T):
         for i in range(self.n_od):
@@ -25,14 +43,12 @@ class Lower:
 
         # payoff we want to maximize
         # note that toll-free paths payoffs differ bcs the initial costs are different bwn ODs:
-        prod = self.n_users * p_old
-        m_old = self.K - self.costs - prod.sum(axis=0)
-        m_old[:, -1] = self.K - self.costs[:, -1] - prod[:, -1]
+        m_old = self.function(self.parameters, p_old)
         m_new = m_old
 
         star = False
 
-        while (np.abs(m_old - m_new) > self.eps).any() or not star:
+        while (np.abs(p_old - p_new) > self.eps).any() or not star:
             p_old = p_new
             m_old = m_new
             star = True
@@ -43,12 +59,9 @@ class Lower:
             # updated probabilities
             for k in range(self.n_od):
                 p_new[k] = p_old[k]*m_old[k]/m_average[k]
-            p_old = p_new
 
             # updated payoff
-            prod = self.n_users * p_old
-            m_new = self.K - self.costs - prod.sum(axis=0)
-            m_new[:, -1] = self.K - self.costs[:, -1] - prod[:, -1]
+            m_new = self.function(self.parameters, p_new)
 
         return p_old
 

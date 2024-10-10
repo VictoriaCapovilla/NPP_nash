@@ -7,23 +7,27 @@ from Instance.lower_level import Lower
 class GeneticAlgorithm:
 
     def __init__(self, instance, pop_size, offspring_proportion=0.5, tp_costs=None, tfp_costs=None, costs=None,
-                 scale_factor=100, lower_eps=10**(-12)):
+                 lower_eps=10**(-12), parameters=None):
 
+        self.parameters = parameters
         self.instance = instance
         self.n_paths = self.instance.n_paths
 
         self.pop_size = pop_size
         self.n_children = int(pop_size * offspring_proportion)
         self.mat_size = self.pop_size + self.n_children
-        self.scale_factor = scale_factor
+
+        self.tfp_costs = self.instance.tfp_costs
+        self.n_users = self.instance.n_users
+        self.M = (self.tfp_costs + self.n_users).max()
 
         self.population = np.zeros((self.mat_size, self.n_paths))
-        self.population[:self.pop_size, :self.n_paths] = np.random.uniform(size=(self.pop_size, self.n_paths))*self.scale_factor
+        self.population[:self.pop_size, :self.n_paths] = np.random.uniform(size=(self.pop_size, self.n_paths))*self.M
 
         self.vals = np.zeros(self.mat_size)
         self.p = [[] for _ in range(self.mat_size)]
 
-        self.lower = Lower(self.instance, lower_eps)
+        self.lower = Lower(self.instance, lower_eps, parameters)
         for i in range(self.pop_size):
             self.vals[i], p = self.lower.eval(self.population[i])
             self.p[i] = p

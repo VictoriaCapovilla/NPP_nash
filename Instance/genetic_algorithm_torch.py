@@ -9,10 +9,12 @@ from Instance.lower_level_torch import LowerTorch
 class GeneticAlgorithmTorch:
 
     def __init__(self, instance, pop_size, offspring_proportion=0.5, tp_costs=None, tfp_costs=None, costs=None,
-                 lower_eps=10**(-12), device=None):
+                 lower_eps=10**(-12), parameters=None, device=None):
 
         self.device = device
+        self.parameters = parameters
         self.instance = instance
+
         self.n_paths = self.instance.n_paths
 
         self.pop_size = pop_size
@@ -25,14 +27,14 @@ class GeneticAlgorithmTorch:
 
         self.population = torch.rand(size=(self.mat_size, self.n_paths), device=self.device) * self.M
         self.parents_idxs = torch.tensor([(i, j) for j in range(self.pop_size) for i in range(j + 1, self.pop_size)],
-                                 device=self.device)
+                                         device=self.device)
 
         self.parents = self.parents_idxs[torch.randperm(self.parents_idxs.shape[0])[:self.n_children]]
 
         self.vals = torch.zeros(self.mat_size, device=self.device)
         self.mask = torch.zeros(self.n_paths * self.n_children, device=self.device, dtype=torch.bool)
 
-        self.lower = LowerTorch(self.instance, lower_eps, mat_size=self.mat_size, device=device)
+        self.lower = LowerTorch(self.instance, lower_eps, parameters, mat_size=self.mat_size, device=device)
         # for i in range(self.pop_size):
         #     self.vals[i] = self.lower.eval(self.population[i])
 

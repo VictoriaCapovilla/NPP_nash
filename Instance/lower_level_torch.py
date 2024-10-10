@@ -6,7 +6,7 @@ from Instance.instance import Instance
 
 class LowerTorch:
 
-    def __init__(self, instance: Instance, eps, mat_size, device):
+    def __init__(self, instance: Instance, eps, parameters, mat_size, device):
 
         # set require grad False
         self.device = device
@@ -25,6 +25,26 @@ class LowerTorch:
         self.costs = torch.repeat_interleave(self.costs.unsqueeze(0), repeats=mat_size, dim=0)
 
         self.eps = eps
+        self.parameters = parameters
+
+    def function(self, parameters, p):
+        prod = self.n_users * p
+        if self.parameters is None:
+            m_old = self.K - self.costs - torch.repeat_interleave(prod.sum(dim=1).unsqueeze(1), repeats=self.n_od,
+                                                                  dim=1)
+            m_old[:, :, -1] = self.K - self.costs[:, :, -1] - prod[:, :, -1]
+        else:
+            alpha, beta = self.parameters
+            # delta = np.ones(self.costs.shape)
+            # for i in range(self.n_od):
+            #     for j in range(self.total_paths):
+            #         if self.costs[i, j] is 0:
+            #             delta[i, j] = 0
+
+            m_old = self.K - self.costs - alpha * torch.repeat_interleave(prod.sum(dim=1).unsqueeze(1),
+                                                                          repeats=self.n_od, dim=1) ** beta
+            m_old[:, :, -1] = self.K - self.costs[:, :, -1] - alpha * prod[:, :, -1] ** beta
+        return m_old
 
     def compute_probs(self, T):
         # T = torch.tensor(T).to(self.device).unsqueeze(1).to(self.device)
@@ -38,14 +58,12 @@ class LowerTorch:
         p_new = p_old
 
         # payoff we want to maximize
-        prod = self.n_users * p_old
-        m_old = self.K - self.costs - torch.repeat_interleave(prod.sum(dim=1).unsqueeze(1), repeats=self.n_od, dim=1)
-        m_old[:, :, -1] = self.K - self.costs[:, :, -1] - prod[:, :, -1]
+        m_old = self.function(self.parameters, p_old)
         m_new = m_old
 
         star = False
 
-        while (torch.abs(m_old - m_new) > self.eps).any() or not star:
+        while (torch.abs(p_old - p_new) > self.eps).any() or not star:
             p_old = p_new
             m_old = m_new
             star = True
@@ -56,16 +74,9 @@ class LowerTorch:
 
             # updated probabilities
             p_new = p_old * m_old / m_average
-            p_old = p_new
 
             # updated payoff
-            prod = self.n_users * p_old
-            # a = prod.sum(dim=1).unsqueeze(1)
-            # a = torch.repeat_interleave(a, repeats=self.n_od, dim=1)
-            # m_new = self.K - self.costs - a
-            m_new = self.K - self.costs - torch.repeat_interleave(prod.sum(dim=1).unsqueeze(1), repeats=self.n_od, dim=1)
-            m_new[:, :, -1] = self.K - self.costs[:, :, -1] - prod[:, :, -1]
-            m_new = m_old
+            m_new = self.function(self.parameters, p_new)
 
         return p_old
 
