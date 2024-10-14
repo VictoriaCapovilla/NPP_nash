@@ -6,7 +6,7 @@ from Instance.instance import Instance
 
 class LowerTorch:
 
-    def __init__(self, instance: Instance, eps, parameters, mat_size, device):
+    def __init__(self, instance: Instance, eps, parameters, mat_size, device, gamma=None):
 
         # set require grad False
         self.device = device
@@ -20,7 +20,7 @@ class LowerTorch:
         self.K = (self.tfp_costs + self.n_users[:, 0]).max() + self.n_users[:, 0].sum()
         self.n_users = torch.repeat_interleave(self.n_users.unsqueeze(0), repeats=mat_size, dim=0)
 
-        self.costs = torch.zeros((instance.n_od, instance.n_paths + 1)).to(self.device)
+        self.costs = torch.zeros((instance.n_od, self.total_paths)).to(self.device)
         self.costs[:, -1] = torch.tensor(instance.tfp_costs).to(self.device)
         self.costs = torch.repeat_interleave(self.costs.unsqueeze(0), repeats=mat_size, dim=0)
 
@@ -30,21 +30,27 @@ class LowerTorch:
     def function(self, parameters, p):
         prod = self.n_users * p
         if self.parameters is None:
-            m_old = self.K - self.costs - torch.repeat_interleave(prod.sum(dim=1).unsqueeze(1), repeats=self.n_od,
-                                                                  dim=1)
-            m_old[:, :, -1] = self.K - self.costs[:, :, -1] - prod[:, :, -1]
+            m = self.K - self.costs - torch.repeat_interleave(prod.sum(dim=1).unsqueeze(1), repeats=self.n_od, dim=1)
+            m[:, :, -1] = self.K - self.costs[:, :, -1] - prod[:, :, -1]
         else:
             alpha, beta = self.parameters
-            # delta = np.ones(self.costs.shape)
-            # for i in range(self.n_od):
-            #     for j in range(self.total_paths):
-            #         if self.costs[i, j] is 0:
-            #             delta[i, j] = 0
 
-            m_old = self.K - self.costs - alpha * torch.repeat_interleave(prod.sum(dim=1).unsqueeze(1),
-                                                                          repeats=self.n_od, dim=1) ** beta
-            m_old[:, :, -1] = self.K - self.costs[:, :, -1] - alpha * prod[:, :, -1] ** beta
-        return m_old
+            delta = torch.ones((self.n_od, self.total_paths)).to(self.device)
+            delta[:, -1] = 0
+            delta = torch.repeat_interleave(delta.unsqueeze(0), repeats=self.mat_size, dim=0)
+
+            # gamma 
+
+            # tr = travel time in unconstrained conditions
+
+            q_a = torch.repeat_interleave(self.n_users.sum(dim=1).unsqueeze(1), repeats=self.n_od, dim=1)
+            q_a[:, :, -1] = self.n_users[:, :, -1]
+
+            m = self.K - alpha * (torch.repeat_interleave(prod.sum(dim=1).unsqueeze(1), repeats=self.n_od, dim=1) /
+                                  q_a) ** beta - delta * self.costs
+            m[:, :, -1] = (self.K - alpha * (prod[:, :, -1] / q_a[:, :, -1]) ** beta -
+                           delta[:, :, -1] * self.costs[:, :, -1])
+        return m
 
     def compute_probs(self, T):
         # T = torch.tensor(T).to(self.device).unsqueeze(1).to(self.device)
@@ -77,7 +83,6 @@ class LowerTorch:
 
             # updated payoff
             m_new = self.function(self.parameters, p_new)
-
         return p_old
 
     def compute_fitness(self, probs):
