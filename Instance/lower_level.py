@@ -13,17 +13,19 @@ class Lower:
         self.n_od = instance.n_od
         self.total_paths = instance.n_paths + 1
         self.n_users = np.array([instance.n_users for _ in range(self.total_paths)]).T
+
         self.costs = np.zeros((instance.n_od, instance.n_paths + 1))
         self.costs[:, -1] = instance.tfp_costs
+
         self.K = (self.tfp_costs + self.n_users[:, 0]).max() + self.n_users[:, 0].sum()
         self.eps = eps
         self.parameters = parameters
 
-    def function(self, parameters, p_old):
-        prod = self.n_users * p_old
+    def function(self, parameters, p):
+        prod = self.n_users * p
         if self.parameters is None:
-            m_old = self.K - self.costs - prod.sum(axis=0)
-            m_old[:, -1] = self.K - self.costs[:, -1] - prod[:, -1]
+            m = self.K - self.costs - prod.sum(axis=0)
+            m[:, -1] = self.K - self.costs[:, -1] - prod[:, -1]
         else:
             alpha, beta = self.parameters
             # delta = np.ones(self.costs.shape)
@@ -32,9 +34,15 @@ class Lower:
             #         if self.costs[i, j] is 0:
             #             delta[i, j] = 0
 
-            m_old = self.K - self.costs - alpha * (prod.sum(axis=0) ** beta)
-            m_old[:, -1] = self.K - self.costs[:, -1] - alpha * (prod[:, -1] ** beta)
-        return m_old
+            q_a = np.zeros((self.n_od, self.total_paths))
+            for i in range(self.n_od):
+            #     q_a[i] = prod.sum(axis=0)
+                q_a[i] = self.n_users.sum(axis=0)
+            q_a[:, -1] = self.n_users[:, -1]
+
+            m = self.K - self.costs - alpha * (prod.sum(axis=0) / q_a) ** beta
+            m[:, -1] = self.K - self.costs[:, -1] - alpha * (prod[:, -1] / q_a[:, -1]) ** beta
+        return m
 
     def compute_probs(self, T):
         for i in range(self.n_od):
