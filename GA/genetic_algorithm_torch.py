@@ -1,9 +1,8 @@
 import numpy as np
-import random
 
 import torch
 
-from Instance.lower_level_torch import LowerTorch
+from GA.lower_level_torch import LowerTorch
 
 
 class GeneticAlgorithmTorch:
@@ -21,9 +20,7 @@ class GeneticAlgorithmTorch:
         self.n_children = int(pop_size * offspring_proportion)
         self.mat_size = self.pop_size + self.n_children
 
-        self.tfp_costs = self.instance.tfp_costs
-        self.n_users = self.instance.n_users
-        self.M = (self.tfp_costs + self.n_users).max()
+        self.M = (self.instance.travel_time[:, -1] * self.instance.n_users).max() #TO DO
 
         self.population = torch.rand(size=(self.mat_size, self.n_paths), device=self.device) * self.M
         self.parents_idxs = torch.tensor([(i, j) for j in range(self.pop_size) for i in range(j + 1, self.pop_size)],
