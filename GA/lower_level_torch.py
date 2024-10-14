@@ -6,9 +6,10 @@ from Instance.instance import Instance
 
 class LowerTorch:
 
-    def __init__(self, instance: Instance, eps, parameters, mat_size, device, alpha=1, beta=1, gamma=1):
+    def __init__(self, instance: Instance, eps, mat_size, device, alpha=1, beta=1, gamma=1, reuse_p=False):
 
         # set require grad False
+        self.reuse_p = reuse_p
         self.device = device
         self.mat_size = mat_size
         self.travel_time = torch.tensor(instance.travel_time).to(self.device)
@@ -42,6 +43,9 @@ class LowerTorch:
         self.m_new = torch.zeros_like(self.q)
         self.m_old = torch.zeros_like(self.q)
 
+        self.p_old = torch.ones((self.n_od, self.total_paths), device=self.device) / self.total_paths
+        self.p_old = torch.repeat_interleave(self.p_old.unsqueeze(0), repeats=self.mat_size, dim=0)
+
 
 
 
@@ -53,8 +57,12 @@ class LowerTorch:
         self.costs[:, :, : -1] = T
 
         # initial probabilities
-        p_old = torch.ones((self.n_od, self.total_paths), device=self.device) / self.total_paths
-        p_old = torch.repeat_interleave(p_old.unsqueeze(0), repeats=self.mat_size, dim=0)
+        if not self.reuse_p:
+            p_old = torch.ones((self.n_od, self.total_paths), device=self.device) / self.total_paths
+            p_old = torch.repeat_interleave(p_old.unsqueeze(0), repeats=self.mat_size, dim=0)
+        else:
+            p_old = self.p_old
+
         p_new = p_old
 
 
@@ -93,7 +101,8 @@ class LowerTorch:
 
             iter += 1
         print(iter)
-
+        if self.reuse_p:
+            self.p_old = p_new
         return p_old
 
     def compute_fitness(self, probs):

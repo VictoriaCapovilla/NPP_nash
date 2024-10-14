@@ -15,8 +15,8 @@ np.random.seed(seed)
 random.seed(seed)
 torch.manual_seed(seed)
 
-PATHS = 50
-N_OD = 30
+PATHS = 90
+N_OD = 90
 POP_SIZE = 1024
 LOWER_EPS = 10**(-4)
 ITERATIONS = 5
@@ -34,7 +34,7 @@ instance = Instance(n_paths=PATHS, n_od=N_OD)  # n_path = available toll-paths
 # print(time.time() - t, genetic_algorithm.obj_val)
 t = time.time()
 genetic_algorithm = GeneticAlgorithmTorch(instance, POP_SIZE, lower_eps=LOWER_EPS, offspring_proportion=OFFSPRING_RATE,
-                                          device=device)
+                                          device=device, reuse_p=True)
 
 genetic_algorithm.run(ITERATIONS)
 
