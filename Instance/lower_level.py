@@ -1,3 +1,6 @@
+import copy
+from copy import deepcopy
+
 import numpy as np
 
 from Instance.instance import Instance
@@ -39,7 +42,7 @@ class Lower:
 
         # initial probabilities
         p_old = np.ones((self.n_od, self.total_paths)) / self.total_paths
-        p_new = p_old
+        p_new = copy.deepcopy(p_old)
 
         # payoff we want to maximize
         # note that toll-free paths payoffs differ bcs the initial costs are different bwn ODs:
@@ -47,9 +50,9 @@ class Lower:
         m_new = m_old
 
         star = False
-
+        iter = 0
         while (np.abs(p_old - p_new) > self.eps).any() or not star:
-            p_old = p_new
+            p_old[:] = p_new
             m_old = m_new
             star = True
 
@@ -62,6 +65,7 @@ class Lower:
 
             # updated payoff
             m_new = self.function(self.parameters, p_new)
+            iter += 1
 
         return p_old
 

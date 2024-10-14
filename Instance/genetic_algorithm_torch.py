@@ -40,6 +40,8 @@ class GeneticAlgorithmTorch:
 
         self.vals = self.lower.eval(self.population)
 
+        self.obj_val = 0
+
     def run(self, iterations):
         for _ in range(iterations):
             # crossover
@@ -66,6 +68,7 @@ class GeneticAlgorithmTorch:
             self.population = self.population[fitness_order]
             self.vals = self.vals[fitness_order]
             # print(self.vals[0])
+        self.obj_val = self.vals[0] / 10**6
 
-        print('costs =\n', self.population[0])
-        print('fitness =\n', self.vals[0])
+        # print('costs =\n', self.population[0])
+        # print('fitness =\n', self.vals[0])

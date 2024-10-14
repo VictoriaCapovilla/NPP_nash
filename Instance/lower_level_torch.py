@@ -62,7 +62,7 @@ class LowerTorch:
         m_new = m_old
 
         star = False
-
+        iter = 0
         while (torch.abs(p_old - p_new) > self.eps).any() or not star:
             p_old = p_new
             m_old = m_new
@@ -77,6 +77,8 @@ class LowerTorch:
 
             # updated payoff
             m_new = self.function(self.parameters, p_new)
+            iter += 1
+        # print(iter)
 
         return p_old
 

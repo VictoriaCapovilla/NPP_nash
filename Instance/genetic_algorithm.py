@@ -27,6 +27,8 @@ class GeneticAlgorithm:
         self.vals = np.zeros(self.mat_size)
         self.p = [[] for _ in range(self.mat_size)]
 
+        self.obj_val = 0
+
         self.lower = Lower(self.instance, lower_eps, parameters)
         for i in range(self.pop_size):
             self.vals[i], p = self.lower.eval(self.population[i])
@@ -51,7 +53,9 @@ class GeneticAlgorithm:
             self.population = self.population[fitness_order]
             self.p = [self.p[i] for i in fitness_order]
             self.vals = self.vals[fitness_order]
-            print(self.vals[0])
-        print('costs =\n', self.population[0])
-        print('probability for each od-pair =\n', self.p[0])
-        print('fitness =\n', self.vals[0])
+            # print(self.vals[0])
+
+        self.obj_val = self.vals[0] / 10**6
+        # print('costs =\n', self.population[0])
+        # print('probability for each od-pair =\n', self.p[0])
+        # print('fitness =\n', self.vals[0])
