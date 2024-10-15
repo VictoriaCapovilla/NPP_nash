@@ -6,7 +6,7 @@ from Instance.instance import Instance
 
 class LowerTorch:
 
-    def __init__(self, instance: Instance, eps, mat_size, device, alpha=1, beta=1, gamma=1, reuse_p=False):
+    def __init__(self, instance: Instance, eps, mat_size, device, M, reuse_p=False):
 
         # set require grad False
         self.reuse_p = reuse_p
@@ -16,9 +16,9 @@ class LowerTorch:
 
         self.n_od = instance.n_od
 
-        self.alpha = alpha
-        self.gamma = gamma
-        self.beta = beta
+        self.alpha = instance.alpha
+        self.beta = instance.beta
+        self.gamma = instance.gamma
 
         self.total_paths = instance.n_paths + 1
         self.q = torch.zeros_like(self.travel_time).to(self.device)
@@ -39,18 +39,8 @@ class LowerTorch:
 
         self.eps = eps
 
-        # CHECK
-        self.M = (self.travel_time[:, :, -1] * (
-                  1 + self.alpha * (torch.repeat_interleave(self.n_users[:, :, -1].sum(dim=1).unsqueeze(1),
-                                                            repeats=self.n_od, dim=1)
-                                    / self.q[:, :, -1]) ** self.beta)).max()
-
-        # self.M = (self.travel_time[0, :, -1] * (1 + self.alpha * (self.n_users[0, :, -1].sum() / self.q[0, :, -1]) **
-        #                                         self.beta)).max()
-
-        self.K = (self.travel_time * (1 + self.alpha * (torch.repeat_interleave(self.n_users.sum(dim=1).unsqueeze(1),
-                                                                                repeats=self.n_od, dim=1)
-                                                        / self.q) ** self.beta)).max() + self.M
+        self.K = (self.travel_time[0, :, :] * (1 + self.alpha * (self.n_users[0, :, 0].sum() / self.q[0, :, :])
+                                               ** self.beta)).max() + M
 
         self.m_new = torch.zeros_like(self.q)
         self.m_old = torch.zeros_like(self.q)

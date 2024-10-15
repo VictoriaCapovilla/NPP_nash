@@ -4,7 +4,7 @@ import numpy as np
 class Instance:
 
     def __init__(self, n_paths, n_od, users_range=(50, 200),
-                 od_transfer_range=(20, 30),  p_transfer_range=(5, 10) ):
+                 od_transfer_range=(20, 30),  p_transfer_range=(5, 10), alpha=1, beta=1.2, gamma=None):
         self.n_paths = n_paths
         self.n_od = n_od
         self.users_range = users_range
@@ -14,6 +14,9 @@ class Instance:
         self.travel_time[:, -1] = np.random.uniform(od_transfer_range[0], od_transfer_range[1], size=self.n_od)
         self.q_od = np.random.randint(self.users_range[0], self.users_range[1], self.n_od)
         self.q_p = np.random.randint(self.users_range[0], self.users_range[1], self.n_paths)
+        self.alpha = alpha
+        self.beta = beta
+        self.gamma = gamma
 
 
     def print_instance(self):
