@@ -39,9 +39,3 @@ genetic_algorithm = GeneticAlgorithmTorch(instance, POP_SIZE, lower_eps=LOWER_EP
 genetic_algorithm.run(ITERATIONS)
 
 print(time.time() - t, genetic_algorithm.obj_val)
-
-import numpy as np
-
-p = np.array(range(4))
-g = p
-g[0] = 9

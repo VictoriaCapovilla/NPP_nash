@@ -18,21 +18,17 @@ class GeneticAlgorithmTorch:
         self.pop_size = pop_size
         self.n_children = int(pop_size * offspring_proportion)
         self.mat_size = self.pop_size + self.n_children
+        self.mask = torch.zeros(self.n_paths * self.n_children, device=self.device, dtype=torch.bool)
 
-        self.M = (self.instance.travel_time[:, -1] * self.instance.n_users).max() #TO DO
+        self.lower = LowerTorch(self.instance, lower_eps, mat_size=self.mat_size, device=device, reuse_p=reuse_p)
 
-        self.population = torch.rand(size=(self.mat_size, self.n_paths), device=self.device) * self.M
+        self.population = torch.rand(size=(self.mat_size, self.n_paths), device=self.device) * self.lower.M
         self.parents_idxs = torch.tensor([(i, j) for j in range(self.pop_size) for i in range(j + 1, self.pop_size)],
                                          device=self.device)
 
         self.parents = self.parents_idxs[torch.randperm(self.parents_idxs.shape[0])[:self.n_children]]
 
         self.vals = torch.zeros(self.mat_size, device=self.device)
-        self.mask = torch.zeros(self.n_paths * self.n_children, device=self.device, dtype=torch.bool)
-
-        self.lower = LowerTorch(self.instance, lower_eps, mat_size=self.mat_size, device=device, reuse_p=reuse_p)
-        # for i in range(self.pop_size):
-        #     self.vals[i] = self.lower.eval(self.population[i])
 
         self.vals = self.lower.eval(self.population)
 
@@ -54,7 +50,8 @@ class GeneticAlgorithmTorch:
             idxs = torch.argwhere(p < 0.02)
             idxs[:, 0] += self.pop_size
 
-            self.population[idxs[:, 0], idxs[:, 1]] = torch.rand(size=(idxs.shape[0],), device=self.device) * self.M
+            self.population[idxs[:, 0], idxs[:, 1]] = (torch.rand(size=(idxs.shape[0],), device=self.device) *
+                                                       self.lower.M)
 
             self.mask[:] = False
 
@@ -64,7 +61,7 @@ class GeneticAlgorithmTorch:
             self.population = self.population[fitness_order]
             self.vals = self.vals[fitness_order]
             # print(self.vals[0])
-        self.obj_val = self.vals[0] / 10**6
+        self.obj_val = self.vals[0]
 
         # print('costs =\n', self.population[0])
         # print('fitness =\n', self.vals[0])

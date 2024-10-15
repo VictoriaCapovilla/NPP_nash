@@ -22,8 +22,9 @@ class LowerTorch:
 
         self.total_paths = instance.n_paths + 1
         self.q = torch.zeros_like(self.travel_time).to(self.device)
-        q_p = torch.repeat_interleave(torch.tensor(instance.q_p, device=self.device).unsqueeze(0), repeats=self.n_od, dim=0)
-        self.q[:, :-1]  = q_p
+        q_p = torch.repeat_interleave(torch.tensor(instance.q_p, device=self.device).unsqueeze(0),
+                                      repeats=self.n_od, dim=0)
+        self.q[:, :-1] = q_p
         self.q[:, -1] = torch.tensor(instance.q_od, device=self.device)
 
         # repeating for pop_size dim
@@ -31,8 +32,6 @@ class LowerTorch:
         self.q = torch.repeat_interleave(self.q.unsqueeze(0), repeats=mat_size, dim=0)
 
         self.n_users = torch.tensor(np.array([instance.n_users for _ in range(self.total_paths)]), device=self.device).T
-
-        self.K = (instance.travel_time[:, -1] * instance.n_users.sum()).max() #TO DO
         self.n_users = torch.repeat_interleave(self.n_users.unsqueeze(0), repeats=mat_size, dim=0)
 
         self.costs = torch.zeros((instance.n_od, self.total_paths)).to(self.device)
@@ -40,15 +39,27 @@ class LowerTorch:
 
         self.eps = eps
 
+        # CHECK
+        self.M = (self.travel_time[:, :, -1] * (
+                  1 + self.alpha * (torch.repeat_interleave(self.n_users[:, :, -1].sum(dim=1).unsqueeze(1),
+                                                            repeats=self.n_od, dim=1)
+                                    / self.q[:, :, -1]) ** self.beta)).max()
+
+        # self.M = (self.travel_time[0, :, -1] * (1 + self.alpha * (self.n_users[0, :, -1].sum() / self.q[0, :, -1]) **
+        #                                         self.beta)).max()
+
+        self.K = (self.travel_time * (1 + self.alpha * (torch.repeat_interleave(self.n_users.sum(dim=1).unsqueeze(1),
+                                                                                repeats=self.n_od, dim=1)
+                                                        / self.q) ** self.beta)).max() + self.M
+
         self.m_new = torch.zeros_like(self.q)
         self.m_old = torch.zeros_like(self.q)
 
-        self.p_old = torch.ones((self.n_od, self.total_paths), device=self.device) / self.total_paths
-        self.p_old = torch.repeat_interleave(self.p_old.unsqueeze(0), repeats=self.mat_size, dim=0)
-
-
-
-
+        if self.reuse_p:
+            self.p_old = torch.ones((self.n_od, self.total_paths), device=self.device) / self.total_paths
+            self.p_old = torch.repeat_interleave(self.p_old.unsqueeze(0), repeats=self.mat_size, dim=0)
+        else:
+            self.p_old = None
 
     def compute_probs(self, T):
         # T = torch.tensor(T).to(self.device).unsqueeze(1).to(self.device)
@@ -65,21 +76,20 @@ class LowerTorch:
 
         p_new = p_old
 
-
         prod = self.n_users * p_new
         # payoff we want to maximize
-        self.m_old[:, :, :]  = self.K - self.travel_time * (1 + self.alpha * (torch.repeat_interleave(prod.sum(dim=1).unsqueeze(1),
-                                                                                       repeats=self.n_od, dim=1) /
-                                                               self.q) ** self.beta) - self.costs
+        self.m_old = self.K - self.travel_time * (
+                      1 + self.alpha * (torch.repeat_interleave(prod.sum(dim=1).unsqueeze(1), repeats=self.n_od, dim=1)
+                                        / self.q) ** self.beta) - self.costs
         self.m_old[:, :, -1] = self.K - self.travel_time[:, :, -1] * (
-                1 + self.alpha * (prod[:, :, -1] / self.q[:, :, -1]) ** self.beta)
-        self.m_new[:, :, :]  = self.m_old
+                                1 + self.alpha * (prod[:, :, -1] / self.q[:, :, -1]) ** self.beta)
+        self.m_new = self.m_old
 
         star = False
         iter = 0
         while (torch.abs(p_old - p_new) > self.eps).any() or not star:
             p_old = p_new
-            self.m_old  = self.m_new
+            self.m_old = self.m_new
             star = True
 
             # average payoff
@@ -93,9 +103,9 @@ class LowerTorch:
             prod = self.n_users * p_new
 
             # ppp = torch.repeat_interleave(prod.sum(dim=1).unsqueeze(1), repeats=self.n_od, dim=1)
-            self.m_new = self.K - self.travel_time * (1 + self.alpha * (torch.repeat_interleave(prod.sum(dim=1).unsqueeze(1),
-                                                                                       repeats=self.n_od, dim=1) /
-                                                               self.q) ** self.beta) - self.costs
+            self.m_new = self.K - self.travel_time * (
+                          1 + self.alpha * (torch.repeat_interleave(prod.sum(dim=1).unsqueeze(1), repeats=self.n_od,
+                                                                    dim=1) / self.q) ** self.beta) - self.costs
             self.m_new[:, :, -1] = self.K - self.travel_time[:, :, -1] * (
                         1 + self.alpha * (prod[:, :, -1] / self.q[:, :, -1]) ** self.beta)
 
