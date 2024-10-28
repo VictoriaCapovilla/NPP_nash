@@ -51,6 +51,8 @@ class LowerTorch:
         else:
             self.p_old = None
 
+        self.data_probs = None
+
     def compute_probs(self, T):
         # T = torch.tensor(T).to(self.device).unsqueeze(1).to(self.device)
         T = torch.repeat_interleave(T.unsqueeze(1), repeats=self.n_od, dim=1)
@@ -100,7 +102,7 @@ class LowerTorch:
                         1 + self.alpha * (prod[:, :, -1] / self.q[:, :, -1]) ** self.beta)
 
             iter += 1
-        print(iter)
+        # print(iter)
         if self.reuse_p:
             self.p_old = p_new
         return p_old
@@ -111,4 +113,5 @@ class LowerTorch:
 
     def eval(self, T):
         probs = self.compute_probs(T)
+        self.data_probs = probs[0, 0]
         return self.compute_fitness(probs)

@@ -1,3 +1,5 @@
+import time
+
 import numpy as np
 
 import torch
@@ -7,8 +9,7 @@ from GA.lower_level_torch import LowerTorch
 
 class GeneticAlgorithmTorch:
 
-    def __init__(self, instance, pop_size, offspring_proportion=0.5,
-                 lower_eps=10**(-12), device=None, reuse_p=False):
+    def __init__(self, instance, pop_size, offspring_proportion=0.5, lower_eps=10**(-12), device=None, reuse_p=False):
 
         self.device = device
         self.instance = instance
@@ -37,18 +38,23 @@ class GeneticAlgorithmTorch:
 
         self.obj_val = 0
 
+        self.data = []
+
     def run(self, iterations):
         for _ in range(iterations):
-            # crossover
+            t = time.time()
+            # crossover:
+            # choose the parents
             self.parents = self.parents_idxs[torch.randperm(self.parents_idxs.shape[0])[:self.n_children]]
 
             self.mask[torch.randperm(self.mask.shape[0])[:self.mask.shape[0]//2]] = True
 
+            # make the children
             self.population[self.pop_size:] = \
                 (self.population[self.parents[:self.n_children][:, 0]] * self.mask.view(self.n_children, -1)
                  + self.population[self.parents[:self.n_children][:, 1]] * (~self.mask.view(self.n_children, -1)))
 
-            # mutation
+            # mutation:
             p = torch.rand(size=(self.n_children, self.n_paths), device=self.device)
             idxs = torch.argwhere(p < 0.02)
             idxs[:, 0] += self.pop_size
@@ -64,6 +70,23 @@ class GeneticAlgorithmTorch:
             self.population = self.population[fitness_order]
             self.vals = self.vals[fitness_order]
             # print(self.vals[0])
+
+            self.data.append(
+                {
+                    'time': time.time() - t,
+                    'fitness': float(self.vals[0]),
+                    'best_individual': np.array(self.population[0]),
+                    # 'probs_od1': np.array(self.lower.data_probs),
+                    'n_paths': self.n_paths,
+                    'n_od': self.instance.n_od,
+                    'pop_size': self.pop_size,
+                    'alpha': self.instance.alpha,
+                    'beta': self.instance.beta,
+                    'M': self.M,
+                    'K': int(self.lower.K)
+                }
+            )
+
         self.obj_val = self.vals[0]
 
         # print('costs =\n', self.population[0])
