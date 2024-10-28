@@ -1,3 +1,5 @@
+import time
+
 import numpy as np
 import torch
 
@@ -51,10 +53,11 @@ class LowerTorch:
         else:
             self.p_old = None
 
-        self.data_probs = None
+        self.n_iter = []
+        self.data_probs = []
+        self.data_time = []
 
     def compute_probs(self, T):
-        # T = torch.tensor(T).to(self.device).unsqueeze(1).to(self.device)
         T = torch.repeat_interleave(T.unsqueeze(1), repeats=self.n_od, dim=1)
 
         self.costs[:, :, : -1] = T
@@ -68,8 +71,8 @@ class LowerTorch:
 
         p_new = p_old
 
-        prod = self.n_users * p_new
         # payoff we want to maximize
+        prod = self.n_users * p_new
         self.m_old = self.K - self.travel_time * (
                       1 + self.alpha * (torch.repeat_interleave(prod.sum(dim=1).unsqueeze(1), repeats=self.n_od, dim=1)
                                         / self.q) ** self.beta) - self.costs
@@ -93,8 +96,6 @@ class LowerTorch:
 
             # updated payoff
             prod = self.n_users * p_new
-
-            # ppp = torch.repeat_interleave(prod.sum(dim=1).unsqueeze(1), repeats=self.n_od, dim=1)
             self.m_new = self.K - self.travel_time * (
                           1 + self.alpha * (torch.repeat_interleave(prod.sum(dim=1).unsqueeze(1), repeats=self.n_od,
                                                                     dim=1) / self.q) ** self.beta) - self.costs
@@ -102,7 +103,9 @@ class LowerTorch:
                         1 + self.alpha * (prod[:, :, -1] / self.q[:, :, -1]) ** self.beta)
 
             iter += 1
+        self.n_iter.append(iter)
         # print(iter)
+
         if self.reuse_p:
             self.p_old = p_new
         return p_old
@@ -112,6 +115,11 @@ class LowerTorch:
         return fitness
 
     def eval(self, T):
+        t = time.time()
+
         probs = self.compute_probs(T)
-        self.data_probs = probs[0, 0]
-        return self.compute_fitness(probs)
+        fit = self.compute_fitness(probs)
+
+        self.data_probs.append(probs[0, 0].numpy())
+        self.data_time.append(time.time() - t)
+        return fit

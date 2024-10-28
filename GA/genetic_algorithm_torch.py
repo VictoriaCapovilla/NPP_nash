@@ -33,16 +33,18 @@ class GeneticAlgorithmTorch:
         self.parents = self.parents_idxs[torch.randperm(self.parents_idxs.shape[0])[:self.n_children]]
 
         self.vals = torch.zeros(self.mat_size, device=self.device)
-
         self.vals = self.lower.eval(self.population)
+
+        self.data_fit = []
+        self.data_fit.append(float(self.vals[0]))
+
+        self.data_individuals = []
+        self.data_individuals.append(self.population[0].numpy())
 
         self.obj_val = 0
 
-        self.data = []
-
     def run(self, iterations):
         for _ in range(iterations):
-            t = time.time()
             # crossover:
             # choose the parents
             self.parents = self.parents_idxs[torch.randperm(self.parents_idxs.shape[0])[:self.n_children]]
@@ -69,23 +71,10 @@ class GeneticAlgorithmTorch:
             fitness_order = np.argsort(-self.vals.to('cpu'))
             self.population = self.population[fitness_order]
             self.vals = self.vals[fitness_order]
-            # print(self.vals[0])
 
-            self.data.append(
-                {
-                    'time': time.time() - t,
-                    'fitness': float(self.vals[0]),
-                    'best_individual': np.array(self.population[0]),
-                    # 'probs_od1': np.array(self.lower.data_probs),
-                    'n_paths': self.n_paths,
-                    'n_od': self.instance.n_od,
-                    'pop_size': self.pop_size,
-                    'alpha': self.instance.alpha,
-                    'beta': self.instance.beta,
-                    'M': self.M,
-                    'K': int(self.lower.K)
-                }
-            )
+            self.data_individuals.append(self.population[0].numpy())
+            self.data_fit.append(float(self.vals[0]))
+            # print(self.vals[0])
 
         self.obj_val = self.vals[0]
 
