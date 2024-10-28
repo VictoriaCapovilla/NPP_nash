@@ -17,14 +17,14 @@ np.random.seed(seed)
 random.seed(seed)
 torch.manual_seed(seed)
 
-PATHS = 3
-N_OD = 3
-POP_SIZE = 4
+PATHS = 10
+N_OD = 4
+POP_SIZE = 256
 LOWER_EPS = 10**(-4)
 ITERATIONS = 100
 OFFSPRING_RATE = 0.5
 
-N_RUN = 2
+N_RUN = 6
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 

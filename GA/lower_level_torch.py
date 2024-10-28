@@ -120,6 +120,6 @@ class LowerTorch:
         probs = self.compute_probs(T)
         fit = self.compute_fitness(probs)
 
-        self.data_probs.append(probs[0, 0].numpy())
+        self.data_probs.append(probs[0, 0].detach().cpu().numpy())
         self.data_time.append(time.time() - t)
         return fit
