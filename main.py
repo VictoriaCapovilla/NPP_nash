@@ -42,17 +42,20 @@ for i in range(N_RUN):
     # creating dataframe
     data = {
                 'time': genetic_algorithm.lower.data_time,
+                'n_iter': genetic_algorithm.lower.n_iter,
                 'fitness': genetic_algorithm.data_fit,
                 'best individual': genetic_algorithm.data_individuals,
-                'probs_od1': genetic_algorithm.lower.data_probs,
-                'n_iter': genetic_algorithm.lower.n_iter,
+                'probs': genetic_algorithm.lower.data_probs,
+                'payoffs': genetic_algorithm.lower.data_payoffs,
                 'n_paths': [genetic_algorithm.n_paths for _ in range(ITERATIONS + 1)],
                 'n_od': [genetic_algorithm.instance.n_od for _ in range(ITERATIONS + 1)],
+                'n_users': [genetic_algorithm.instance.n_users for _ in range(ITERATIONS + 1)],
                 'pop_size': [genetic_algorithm.pop_size for _ in range(ITERATIONS + 1)],
                 'alpha': [genetic_algorithm.instance.alpha for _ in range(ITERATIONS + 1)],
                 'beta': [genetic_algorithm.instance.beta for _ in range(ITERATIONS + 1)],
                 'M': [genetic_algorithm.M for _ in range(ITERATIONS + 1)],
                 'K': [float(genetic_algorithm.lower.K) for _ in range(ITERATIONS + 1)],
+                'eps': [genetic_algorithm.lower.eps for _ in range(ITERATIONS + 1)],
                 'run': [i for _ in range(ITERATIONS + 1)]
             }
 
@@ -65,5 +68,5 @@ for i in range(N_RUN):
 
     print('run', i, 'complete', '\ntime:', time.time() - t)
 
-total_df.to_csv(r"Results/output", index=False)
+# total_df.to_csv(r"Results/output_eps-6", index=False)
 # print('DataFrame:\n', total_df)

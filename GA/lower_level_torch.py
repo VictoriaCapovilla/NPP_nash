@@ -54,6 +54,7 @@ class LowerTorch:
             self.p_old = None
 
         self.n_iter = []
+        self.data_payoffs = []
         self.data_probs = []
         self.data_time = []
 
@@ -104,6 +105,7 @@ class LowerTorch:
 
             iter += 1
         self.n_iter.append(iter)
+        self.data_payoffs.append(self.m_new[0].detach().cpu().numpy())
         # print(iter)
 
         if self.reuse_p:
@@ -120,6 +122,6 @@ class LowerTorch:
         probs = self.compute_probs(T)
         fit = self.compute_fitness(probs)
 
-        self.data_probs.append(probs[0, 0].detach().cpu().numpy())
+        self.data_probs.append(probs[0].detach().cpu().numpy())
         self.data_time.append(time.time() - t)
         return fit
