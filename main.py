@@ -44,7 +44,7 @@ for i in range(N_RUN):
                 'time': genetic_algorithm.lower.data_time,
                 'n_iter': genetic_algorithm.lower.n_iter,
                 'fitness': genetic_algorithm.data_fit,
-                'best individual': genetic_algorithm.data_individuals,
+                'best_individual': genetic_algorithm.data_individuals,
                 'probs': genetic_algorithm.lower.data_probs,
                 'payoffs': genetic_algorithm.lower.data_payoffs,
                 'n_paths': [genetic_algorithm.n_paths for _ in range(ITERATIONS + 1)],
@@ -68,5 +68,7 @@ for i in range(N_RUN):
 
     print('run', i, 'complete', '\ntime:', time.time() - t)
 
-# total_df.to_csv(r"Results/output_eps-6", index=False)
+# total_df.to_csv(r"Results/output", index=False)
+# df = pd.read_csv('C:/Users/viki/Desktop/NPP/Results/output')
+
 # print('DataFrame:\n', total_df)

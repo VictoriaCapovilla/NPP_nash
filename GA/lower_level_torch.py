@@ -93,7 +93,8 @@ class LowerTorch:
             m_average = torch.repeat_interleave(m_average, repeats=p_old.shape[2], dim=2)
 
             # updated probabilities
-            p_new = p_old * self.m_old / m_average
+            p_new = torch.round(p_old * self.m_old / m_average, decimals=3)
+            p_new = p_new / torch.repeat_interleave(p_new.sum(dim=2).unsqueeze(2), repeats=self.total_paths, dim=2)
 
             # updated payoff
             prod = self.n_users * p_new
@@ -122,6 +123,6 @@ class LowerTorch:
         probs = self.compute_probs(T)
         fit = self.compute_fitness(probs)
 
-        self.data_probs.append(probs[0].detach().cpu().numpy())
+        self.data_probs.append(np.round(probs[0].detach().cpu().numpy(), 4))
         self.data_time.append(time.time() - t)
         return fit
