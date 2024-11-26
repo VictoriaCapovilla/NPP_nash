@@ -3,13 +3,15 @@ import time
 import numpy as np
 
 import torch
+from sympy import zeros
 
 from GA.lower_level_torch import LowerTorch
 
 
 class GeneticAlgorithmTorch:
 
-    def __init__(self, instance, pop_size, offspring_proportion=0.5, lower_eps=10**(-12), device=None, reuse_p=False):
+    def __init__(self, instance, pop_size, offspring_proportion=0.5, lower_eps=10**(-12),
+                 device=None, reuse_p=False):
 
         self.device = device
         self.instance = instance
@@ -19,7 +21,6 @@ class GeneticAlgorithmTorch:
         self.pop_size = pop_size
         self.n_children = int(pop_size * offspring_proportion)
         self.mat_size = self.pop_size + self.n_children
-        # self.mask = torch.zeros(self.n_paths * self.n_children, device=self.device, dtype=torch.bool)
 
         self.M = (self.instance.travel_time[:, -1] * (
                 1 + self.instance.alpha * (self.instance.n_users / self.instance.q_od) ** self.instance.beta)).max()
@@ -36,19 +37,16 @@ class GeneticAlgorithmTorch:
         # fitness evaluation
         self.vals = torch.zeros(self.mat_size, device=self.device)
         self.vals = self.lower.eval(self.population)
-        fitness_order = np.argsort(-self.vals.to('cpu'))
-        self.population = self.population[fitness_order]
-        self.vals = self.vals[fitness_order]
 
         self.data_fit = []
-        self.data_fit.append(float(self.vals[0]))
+        self.data_fit.append(float(self.vals[np.argsort(-self.vals.to('cpu'))][0]))
 
         self.data_individuals = []
         self.data_individuals.append(self.population[0].detach().cpu().numpy())
 
         self.obj_val = 0
 
-    def run(self, iterations):
+    def run(self, iterations, mutation_range=(-5,5)):
         for _ in range(iterations):
             # SELECTION
             self.parents = self.parents_idxs[torch.randperm(self.parents_idxs.shape[0])[:self.n_children]]
@@ -60,25 +58,20 @@ class GeneticAlgorithmTorch:
                  + (1 - weights) * self.population[self.parents[:self.n_children][:, 1]])
 
             # UNIFORM MUTATION
-            noise = 2 * torch.rand(size=(self.n_children, self.n_paths), device=self.device) - 1
+            mutation_a = mutation_range[0] * torch.ones(size=(self.n_children, self.n_paths), device=self.device)
+            mutation_a = torch.max(mutation_a, - self.population[self.pop_size:])
+            mutation_b = mutation_range[1] * torch.ones(size=(self.n_children, self.n_paths), device=self.device)
+            mutation_b = torch.min(mutation_b, self.M - self.population[self.pop_size:])
+
+            # create noise tensor with random values in range (mutation_a, mutation_b)
+            noise = ((mutation_b - mutation_a) * torch.rand(size=(self.n_children, self.n_paths), device=self.device)
+                     + mutation_a)
+
             self.population[self.pop_size:] = self.population[self.pop_size:] + noise
+            torch.where(self.population[self.pop_size:] < 0, 0, self.population[self.pop_size:])
+            torch.where(self.population[self.pop_size:] > self.M, self.M, self.population[self.pop_size:])
 
             # # valutare mutazione su tutta la popolazione
-
-            n = 0
-            for i in range(self.n_children):
-                for j in range(self.n_paths):
-                    if self.population[self.pop_size + i, j] > self.M:
-                        self.population[self.pop_size + i, j] = self.M
-                        n += 1
-                        # print('individual', [self.pop_size + i, j], 'replaced with M =', self.M)
-                    elif self.population[self.pop_size + i, j] < 0:
-                        self.population[self.pop_size + i, j] = 0
-                        n += 1
-                        # print('individual', [self.pop_size + i, j], 'replaced with 0')
-
-            if n != 0:
-                print('number of tolls out of range in generation', _, ':', n)
 
             # FITNESS EVALUATION
             self.vals = self.lower.eval(self.population)
