@@ -20,17 +20,17 @@ def to_float(a):
 
 
 # same instance
-df4 = pd.read_csv('/Results/Noroundprobs/output_eps-4')
-df5 = pd.read_csv('/Results/Noroundprobs/output_eps-5')
-df6 = pd.read_csv('/Results/Noroundprobs/output_eps-6')
+df4 = pd.read_csv('C:/Users/viki/Desktop/NPP/Results/Noroundprobs/output_eps-4')
+df5 = pd.read_csv('C:/Users/viki/Desktop/NPP/Results/Noroundprobs/output_eps-5')
+df6 = pd.read_csv('C:/Users/viki/Desktop/NPP/Results/Noroundprobs/output_eps-6')
 
 # df4s = pd.read_csv('C:/Users/viki/Desktop/NPP/Results/Noroundprobs/study_eps-4')
 # df5s = pd.read_csv('C:/Users/viki/Desktop/NPP/Results/Noroundprobs/study_eps-5')
 # df6s = pd.read_csv('C:/Users/viki/Desktop/NPP/Results/Noroundprobs/study_eps-6')
 
 # rounded probabilities
-df_rprob = pd.read_csv('/Results/output_roundprobs')
-df_rprobs = pd.read_csv('/Results/study_roundprobs')
+df_rprob = pd.read_csv('C:/Users/viki/Desktop/NPP/Results/output_roundprobs')
+df_rprobs = pd.read_csv('C:/Users/viki/Desktop/NPP/Results/study_roundprobs')
 
 # for _ in [df0, df1, df2, df3, df4, df5, df6]:
 #     _.best_individual = _.best_individual.apply(to_matrix)
