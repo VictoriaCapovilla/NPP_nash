@@ -51,7 +51,7 @@ class GeneticAlgorithmTorch:
 
         self.obj_val = 0
 
-    def run(self, iterations, mutation_range=(-5,5)):
+    def run(self, iterations, mutation_range=(-3,3)):
         for _ in range(iterations):
             # SELECTION
             self.parents = self.parents_idxs[torch.randperm(self.parents_idxs.shape[0])[:self.n_children]]
