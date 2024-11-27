@@ -38,11 +38,16 @@ class GeneticAlgorithmTorch:
         self.vals = torch.zeros(self.mat_size, device=self.device)
         self.vals = self.lower.eval(self.population)
 
+        # con le seguenti, variazione del +0.19%
+        # fitness_order = np.argsort(-self.vals.to('cpu'))
+        # self.population = self.population[fitness_order]
+        # self.vals = self.vals[fitness_order]
+
         self.data_fit = []
         self.data_fit.append(float(self.vals[np.argsort(-self.vals.to('cpu'))][0]))
 
         self.data_individuals = []
-        self.data_individuals.append(self.population[0].detach().cpu().numpy())
+        self.data_individuals.append(self.population[np.argsort(-self.vals.to('cpu'))][0].detach().cpu().numpy())
 
         self.obj_val = 0
 
