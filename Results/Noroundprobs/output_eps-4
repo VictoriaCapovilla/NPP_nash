@@ -1,4 +1,4 @@
-time,n_iter,fitness,best individual,probs,payoffs,n_paths,n_od,n_users,pop_size,alpha,beta,M,K,eps,run
+time,n_iter,fitness,best_individual,probs,payoffs,n_paths,n_od,n_users,pop_size,alpha,beta,M,K,eps,run
 1.3394379615783691,2754,2096.5050558488483,"[ 44.431007   57.52858     2.7758224 104.6712    105.31418    88.710396
   46.208893   91.32982    25.502363  101.276146 ]","[[1.49849287e-059 5.00422355e-099 5.74907033e-001 3.65886117e-244
   2.29355827e-247 1.46311964e-186 1.74840247e-069 9.30041280e-197
