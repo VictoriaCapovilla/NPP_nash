@@ -37,26 +37,28 @@ for i in range(N_RUN):
     genetic_algorithm = GeneticAlgorithmTorch(instance, POP_SIZE, lower_eps=LOWER_EPS,
                                               offspring_proportion=OFFSPRING_RATE, device=device, reuse_p=None)
     genetic_algorithm.run(ITERATIONS)
-    # print(time.time() - t, genetic_algorithm.obj_val)
 
     # creating dataframe
     data = {
-                'time': genetic_algorithm.lower.data_time,
-                'n_iter': genetic_algorithm.lower.n_iter,
-                'fitness': genetic_algorithm.data_fit,
-                'best_individual': genetic_algorithm.data_individuals,
-                'probs': genetic_algorithm.lower.data_probs,
-                'payoffs': genetic_algorithm.lower.data_payoffs,
-                'n_paths': [genetic_algorithm.n_paths for _ in range(ITERATIONS + 1)],
-                'n_od': [genetic_algorithm.instance.n_od for _ in range(ITERATIONS + 1)],
-                'n_users': [genetic_algorithm.instance.n_users for _ in range(ITERATIONS + 1)],
-                'pop_size': [genetic_algorithm.pop_size for _ in range(ITERATIONS + 1)],
-                'alpha': [genetic_algorithm.instance.alpha for _ in range(ITERATIONS + 1)],
-                'beta': [genetic_algorithm.instance.beta for _ in range(ITERATIONS + 1)],
-                'M': [genetic_algorithm.M for _ in range(ITERATIONS + 1)],
-                'K': [float(genetic_algorithm.lower.K) for _ in range(ITERATIONS + 1)],
-                'eps': [genetic_algorithm.lower.eps for _ in range(ITERATIONS + 1)],
-                'run': [i for _ in range(ITERATIONS + 1)]
+        'time': time.time() - t,
+        'fitness': float(genetic_algorithm.obj_val),
+        'best_individual': [genetic_algorithm.data_individuals[-1]],
+        'lower_time': [genetic_algorithm.lower.data_time],
+        'lower_iter': [genetic_algorithm.lower.n_iter],
+        'fit_update': [genetic_algorithm.data_fit],
+        'ind_update': [genetic_algorithm.data_individuals],
+        # 'probs': [genetic_algorithm.lower.data_probs],
+        # 'payoffs': [genetic_algorithm.lower.data_payoffs],
+        'n_paths': genetic_algorithm.n_paths,
+        'n_od': genetic_algorithm.instance.n_od,
+        'n_users': [genetic_algorithm.instance.n_users],
+        'pop_size': genetic_algorithm.pop_size,
+        'alpha': genetic_algorithm.instance.alpha,
+        'beta': genetic_algorithm.instance.beta,
+        'M': genetic_algorithm.M,
+        'K': float(genetic_algorithm.lower.K),
+        'eps': genetic_algorithm.lower.eps,
+        'run': i
             }
 
     df = pd.DataFrame(data=data)
@@ -66,9 +68,12 @@ for i in range(N_RUN):
     else:
         total_df = pd.concat([total_df, df])
 
-    print('run', i, 'complete', '\ntime:', time.time() - t)
+    print('run', i, 'complete', '\ntime:', time.time() - t, '\nfitness:', genetic_algorithm.obj_val)
 
 # total_df.to_csv(r"Results/output", index=False)
 # df = pd.read_csv('C:/Users/viki/Desktop/NPP/Results/output')
+
+total_df.to_csv(r'GA\Project\rv_uniform', index=False)
+df = pd.read_csv(r'C:\Users\viki\Desktop\NPP\GA\Project\rv_uniform')
 
 # print('DataFrame:\n', total_df)
