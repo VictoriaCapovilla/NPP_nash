@@ -8,8 +8,19 @@ import torch
 
 import pandas as pd
 
+import matplotlib.pyplot as plt
+
 from GA.PSO.PSO import GeneticAlgorithmTorch
 from Instance.instance import Instance
+
+
+# Convert the cleaned string to an array
+def to_matrix(a):
+    cleaned_string = (a.replace('\r\n', ' ').replace('\n', ' ').strip().replace('   ', ' ').replace('  ', ' ')
+                      .replace('[ ', '[').replace(' ]', ']').replace(' ', ',').replace(',,', ',').replace(',,', ','))
+
+    return np.array(ast.literal_eval(cleaned_string))
+
 
 seed = 0
 np.random.seed(seed)
@@ -67,3 +78,12 @@ for i in range(N_RUN):
 
 total_df.to_csv(r'C:\Users\viki\Desktop\NPP\GA\PSO\study', index=False)
 df = pd.read_csv(r'C:\Users\viki\Desktop\NPP\GA\PSO\study')
+
+x = np.array(range(0, 1632))
+y = to_matrix(df.fit_update[0])[0:]
+plt.title("Plotting PSO")
+plt.xlabel("")
+plt.ylabel("fitness")
+plt.plot(x, y, color="purple", label="Array elements")
+plt.legend()
+plt.show()
