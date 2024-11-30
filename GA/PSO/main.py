@@ -1,3 +1,4 @@
+import ast
 import time
 
 import numpy as np
@@ -17,9 +18,7 @@ torch.manual_seed(seed)
 
 PATHS = 10
 N_OD = 4
-POP_SIZE = 8
 LOWER_EPS = 10**(-4)
-OFFSPRING_RATE = 0.5
 
 N_RUN = 6
 
@@ -38,7 +37,7 @@ for i in range(N_RUN):
     # creating dataframe
     data = {
         'time': time.time() - t,
-        'upper_iter': 100,
+        'upper_iter': 300,
         'fitness': float(genetic_algorithm.obj_val),
         'best_individual': [genetic_algorithm.lower.data_individuals[-1]],
         'lower_time': [genetic_algorithm.lower.data_time],
@@ -64,7 +63,7 @@ for i in range(N_RUN):
     else:
         total_df = pd.concat([total_df, df])
 
-    print('run', i, 'complete', '\ntime:', time.time() - t, '\nfitness:', genetic_algorithm.obj_val)
+    print('Execution time:', time.time() - t, '\nRun', i, 'complete', '\n')
 
-total_df.to_csv(r'GA\Project\PSO\study', index=False)
-df = pd.read_csv(r'C:\Users\viki\Desktop\NPP\GA\Project\PSO\study')
+total_df.to_csv(r'C:\Users\viki\Desktop\NPP\GA\PSO\study300', index=False)
+df = pd.read_csv(r'C:\Users\viki\Desktop\NPP\GA\PSO\study300')
