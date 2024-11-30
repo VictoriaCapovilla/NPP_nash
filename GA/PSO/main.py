@@ -65,5 +65,5 @@ for i in range(N_RUN):
 
     print('Execution time:', time.time() - t, '\nRun', i, 'complete', '\n')
 
-total_df.to_csv(r'C:\Users\viki\Desktop\NPP\GA\PSO\study300', index=False)
-df = pd.read_csv(r'C:\Users\viki\Desktop\NPP\GA\PSO\study300')
+total_df.to_csv(r'C:\Users\viki\Desktop\NPP\GA\PSO\study', index=False)
+df = pd.read_csv(r'C:\Users\viki\Desktop\NPP\GA\PSO\study')
