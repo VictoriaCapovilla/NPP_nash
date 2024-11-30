@@ -6,11 +6,9 @@ import random
 import torch
 
 import pandas as pd
-from openpyxl import load_workbook
 
 from GA.genetic_algorithm_torch import GeneticAlgorithmTorch
 from Instance.instance import Instance
-from old.genetic_algorithm import GeneticAlgorithm
 
 seed = 0
 np.random.seed(seed)
@@ -36,11 +34,13 @@ for i in range(N_RUN):
     t = time.time()
     genetic_algorithm = GeneticAlgorithmTorch(instance, POP_SIZE, lower_eps=LOWER_EPS,
                                               offspring_proportion=OFFSPRING_RATE, device=device, reuse_p=None)
+
     genetic_algorithm.run(ITERATIONS)
 
     # creating dataframe
     data = {
         'time': time.time() - t,
+        # 'upper_iter': ITERATIONS,
         'fitness': float(genetic_algorithm.obj_val),
         'best_individual': [genetic_algorithm.data_individuals[-1]],
         'lower_time': [genetic_algorithm.lower.data_time],
@@ -70,10 +70,5 @@ for i in range(N_RUN):
 
     print('run', i, 'complete', '\ntime:', time.time() - t, '\nfitness:', genetic_algorithm.obj_val)
 
-# total_df.to_csv(r"Results/output", index=False)
-# df = pd.read_csv('C:/Users/viki/Desktop/NPP/Results/output')
-
-total_df.to_csv(r'GA\Project\rv_uniform', index=False)
-df = pd.read_csv(r'C:\Users\viki\Desktop\NPP\GA\Project\rv_uniform')
-
-# print('DataFrame:\n', total_df)
+total_df.to_csv(r'C:/Users/viki/Desktop/NPP/Results/output', index=False)
+df = pd.read_csv('C:/Users/viki/Desktop/NPP/Results/output')

@@ -26,6 +26,7 @@ class GeneticAlgorithmTorch:
 
         self.lower = LowerTorch(self.instance, lower_eps, mat_size=self.mat_size, device=device, M=self.M, reuse_p=reuse_p)
 
+        # initialization
         self.population = torch.rand(size=(self.mat_size, self.n_paths), device=self.device) * self.M
         self.parents_idxs = torch.tensor([(i, j) for j in range(self.pop_size) for i in range(j + 1, self.pop_size)],
                                          device=self.device)
@@ -45,13 +46,12 @@ class GeneticAlgorithmTorch:
 
     def run(self, iterations):
         for _ in range(iterations):
-            # crossover:
-            # choose the parents
+            # selection
             self.parents = self.parents_idxs[torch.randperm(self.parents_idxs.shape[0])[:self.n_children]]
 
             self.mask[torch.randperm(self.mask.shape[0])[:self.mask.shape[0]//2]] = True
 
-            # make the children
+            # crossover
             self.population[self.pop_size:] = \
                 (self.population[self.parents[:self.n_children][:, 0]] * self.mask.view(self.n_children, -1)
                  + self.population[self.parents[:self.n_children][:, 1]] * (~self.mask.view(self.n_children, -1)))
