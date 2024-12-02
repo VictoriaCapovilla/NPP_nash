@@ -1,3 +1,5 @@
+import time
+
 import numpy as np
 import torch
 
@@ -22,13 +24,13 @@ class CMAES:
 
         self.times = []
 
-
     def fitness_evaluation(self, population):
         population = torch.repeat_interleave(torch.from_numpy(np.array(population)).unsqueeze(0),
                                              repeats=self.instance.n_od, dim=0)
         return - self.lower.eval(torch.from_numpy(np.array(population)))
 
     def run_CMA(self, iterations, sigma):
+        self.times.append(time.time())
         optimizer = CMA(mean=np.zeros(self.n_paths), sigma=sigma, bounds=(np.array([[0, self.M]] * self.n_paths)))
         all_solutions = []
         for generation in range(iterations):
