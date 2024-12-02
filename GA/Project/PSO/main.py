@@ -10,7 +10,7 @@ import pandas as pd
 
 import matplotlib.pyplot as plt
 
-from GA.PSO.PSO import PSO
+from GA.Project.PSO.PSO import PSO
 from Instance.instance import Instance
 
 

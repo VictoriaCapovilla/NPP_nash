@@ -1,11 +1,9 @@
-import time
-
 import numpy as np
 import torch
 
 from cmaes import CMA
 
-from GA.PSO.lower_level import LowerLevel
+from GA.Project.lower_level import LowerLevel
 
 
 class CMAES:

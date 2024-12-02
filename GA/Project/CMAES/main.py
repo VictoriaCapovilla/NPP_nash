@@ -10,7 +10,7 @@ import pandas as pd
 
 import matplotlib.pyplot as plt
 
-from GA.CMAES.CMAES import CMAES
+from GA.Project.CMAES.CMAES import CMAES
 from Instance.instance import Instance
 
 
@@ -80,7 +80,7 @@ for i in range(N_RUN):
     print('Execution time:', time.time() - t, '\nRun', i, 'complete', '\n')
 
 total_df.to_csv(r'C:\Users\viki\Desktop\NPP\Results\10_4\CMA1_1', index=False)
-df = pd.read_csv(r'C:\Users\viki\Desktop\NPP\Results\10_4\CMA1_1')
+df = pd.read_csv(r'/Results/10_4/CMA1_1')
 
 x = np.array(range(0, 1000))
 y = to_matrix(df.fit_update[0])[0:]

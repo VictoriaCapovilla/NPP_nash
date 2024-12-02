@@ -5,7 +5,7 @@ import torch
 
 from fstpso import FuzzyPSO
 
-from GA.PSO.lower_level import LowerLevel
+from GA.Project.lower_level import LowerLevel
 
 
 class PSO:
