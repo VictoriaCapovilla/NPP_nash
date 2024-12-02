@@ -58,6 +58,8 @@ class LowerTorch:
         self.data_probs = []
         self.data_time = []
 
+        self.total_time = []
+
     def compute_probs(self, T):
         T = torch.repeat_interleave(T.unsqueeze(1), repeats=self.n_od, dim=1)
 
@@ -125,4 +127,5 @@ class LowerTorch:
 
         self.data_probs.append(np.round(probs[0].detach().cpu().numpy(), 4))
         self.data_time.append(time.time() - t)
+        self.total_time.append(time.time())
         return fit

@@ -38,6 +38,11 @@ class RVGA_Uniform:
         self.vals = torch.zeros(self.mat_size, device=self.device)
         self.vals = self.lower.eval(self.population)
 
+        # con le seguenti, variazione del +0.19%
+        # fitness_order = np.argsort(-self.vals.to('cpu'))
+        # self.population = self.population[fitness_order]
+        # self.vals = self.vals[fitness_order]
+
         self.data_fit = []
         self.data_fit.append(float(self.vals[np.argsort(-self.vals.to('cpu'))][0]))
 
@@ -72,11 +77,17 @@ class RVGA_Uniform:
             torch.where(self.population[self.pop_size:] < 0, 0, self.population[self.pop_size:])
             torch.where(self.population[self.pop_size:] > self.M, self.M, self.population[self.pop_size:])
 
+            # # valutare mutazione su tutta la popolazione
+
             # FITNESS EVALUATION
             self.vals = self.lower.eval(self.population)
             fitness_order = np.argsort(-self.vals.to('cpu'))
             self.population = self.population[fitness_order]
             self.vals = self.vals[fitness_order]
+
+            # # sistemare elitismo
+            # idea: salvare i nuovi self.population[self.pop_size:] a parte e tenere i migliori self.mat_size tra
+            # questi e la vecchia popolazione
 
             self.data_individuals.append(list(self.population[0].detach().cpu().numpy()))
             self.data_fit.append(float(self.vals[0]))
