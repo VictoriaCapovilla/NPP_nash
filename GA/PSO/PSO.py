@@ -27,12 +27,12 @@ class GeneticAlgorithmTorch:
                                              repeats=self.instance.n_od, dim=0)
         return - self.lower.eval(torch.from_numpy(np.array(population)))
 
-    def run_PSO(self):
+    def run_PSO(self, max_iter):
         dims = self.n_paths
         FP = FuzzyPSO()
         FP.set_search_space([[0, self.M]] * dims)
         FP.set_fitness(self.fitness_evaluation)
-        result = FP.solve_with_fstpso(max_iter=300)
+        result = FP.solve_with_fstpso(max_iter=max_iter)
         print("Best solution:", result[0])
         self.obj_val = torch.abs(result[1]).detach().cpu().numpy()
         print("Whose fitness is:", self.obj_val)

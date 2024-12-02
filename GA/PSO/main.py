@@ -30,6 +30,7 @@ torch.manual_seed(seed)
 PATHS = 10
 N_OD = 4
 LOWER_EPS = 10**(-4)
+MAX_ITER = 300
 
 N_RUN = 6
 
@@ -43,12 +44,12 @@ for i in range(N_RUN):
     t = time.time()
     genetic_algorithm = GeneticAlgorithmTorch(instance, lower_eps=LOWER_EPS, device=device, reuse_p=None)
 
-    genetic_algorithm.run_PSO()
+    genetic_algorithm.run_PSO(MAX_ITER)
 
     # creating dataframe
     data = {
         'time': time.time() - t,
-        'upper_iter': 300,
+        'upper_iter': MAX_ITER,
         'fitness': float(genetic_algorithm.obj_val),
         'best_individual': [genetic_algorithm.lower.data_individuals[-1]],
         'lower_time': [genetic_algorithm.lower.data_time],
