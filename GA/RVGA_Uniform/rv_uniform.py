@@ -45,6 +45,7 @@ class RVGA_Uniform:
         self.data_individuals.append(self.population[np.argsort(-self.vals.to('cpu'))][0].detach().cpu().numpy())
 
         self.obj_val = 0
+        self.times = []
 
     def run_um(self, iterations, mutation_range):
         for _ in range(iterations):
@@ -85,3 +86,8 @@ class RVGA_Uniform:
 
         # print('costs =\n', self.population[0])
         # print('fitness =\n', self.vals[0])
+
+        self.times += self.lower.total_time
+        self.times = np.array(self.times)
+        self.times = self.times - self.times[0]
+
