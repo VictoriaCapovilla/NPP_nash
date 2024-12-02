@@ -10,7 +10,7 @@ import pandas as pd
 
 import matplotlib.pyplot as plt
 
-from GA.PSO.PSO import GeneticAlgorithmTorch
+from GA.PSO.PSO import PSO
 from Instance.instance import Instance
 
 
@@ -29,8 +29,8 @@ torch.manual_seed(seed)
 
 PATHS = 10
 N_OD = 4
+ITERATIONS = 100
 LOWER_EPS = 10**(-4)
-MAX_ITER = 300
 
 N_RUN = 6
 
@@ -42,14 +42,14 @@ total_df = None
 
 for i in range(N_RUN):
     t = time.time()
-    genetic_algorithm = GeneticAlgorithmTorch(instance, lower_eps=LOWER_EPS, device=device, reuse_p=None)
+    genetic_algorithm = PSO(instance, lower_eps=LOWER_EPS, device=device, reuse_p=None)
 
-    genetic_algorithm.run_PSO(MAX_ITER)
+    genetic_algorithm.run_PSO(ITERATIONS)
 
     # creating dataframe
     data = {
         'time': time.time() - t,
-        'upper_iter': MAX_ITER,
+        'upper_iter': ITERATIONS,
         'fitness': float(genetic_algorithm.obj_val),
         'best_individual': [genetic_algorithm.lower.data_individuals[-1]],
         'lower_time': [genetic_algorithm.lower.data_time],
@@ -77,8 +77,8 @@ for i in range(N_RUN):
 
     print('Execution time:', time.time() - t, '\nRun', i, 'complete', '\n')
 
-total_df.to_csv(r'C:\Users\viki\Desktop\NPP\GA\PSO\study', index=False)
-df = pd.read_csv(r'C:\Users\viki\Desktop\NPP\GA\PSO\study')
+total_df.to_csv(r'C:\Users\viki\Desktop\Results\10_4\PSOstudy', index=False)
+df = pd.read_csv(r'C:\Users\viki\Desktop\Results\10_4\PSOstudy')
 
 x = np.array(range(0, 1632))
 y = to_matrix(df.fit_update[0])[0:]

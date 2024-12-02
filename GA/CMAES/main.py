@@ -10,7 +10,7 @@ import pandas as pd
 
 import matplotlib.pyplot as plt
 
-from GA.CMAES.CMA import GeneticAlgorithmTorch
+from GA.CMAES.CMAES import CMAES
 from Instance.instance import Instance
 
 
@@ -43,10 +43,9 @@ total_df = None
 
 for i in range(N_RUN):
     t = time.time()
-    genetic_algorithm = GeneticAlgorithmTorch(instance, lower_eps=LOWER_EPS, device=device, reuse_p=None)
+    genetic_algorithm = CMAES(instance, lower_eps=LOWER_EPS, device=device, reuse_p=None)
 
-    sol = genetic_algorithm.run_CMA(ITERATIONS, STD)
-
+    genetic_algorithm.run_CMA(ITERATIONS, STD)
 
     # creating dataframe
     data = {
@@ -88,6 +87,5 @@ y = to_matrix(df.fit_update[0])[0:]
 plt.title("Plotting CMA-ES")
 plt.xlabel("X axis")
 plt.ylabel("Y axis")
-plt.plot(x, y, color="purple", label="Array elements")
 plt.legend()
 plt.show()

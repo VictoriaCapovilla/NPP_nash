@@ -1,15 +1,14 @@
 import time
 
 import numpy as np
+import torch
 
 from cmaes import CMA
 
-import torch
-
-from GA.CMAES.lower_level import LowerTorch
+from GA.PSO.lower_level import LowerLevel
 
 
-class GeneticAlgorithmTorch:
+class CMAES:
 
     def __init__(self, instance, lower_eps=10**(-12), device=None, reuse_p=False):
 
@@ -21,7 +20,10 @@ class GeneticAlgorithmTorch:
         self.M = (self.instance.travel_time[:, -1] * (
                 1 + self.instance.alpha * (self.instance.n_users / self.instance.q_od) ** self.instance.beta)).max()
 
-        self.lower = LowerTorch(self.instance, lower_eps, device=device, M=self.M, reuse_p=reuse_p)
+        self.lower = LowerLevel(self.instance, lower_eps, device=device, M=self.M, reuse_p=reuse_p)
+
+        self.times = []
+
 
     def fitness_evaluation(self, population):
         population = torch.repeat_interleave(torch.from_numpy(np.array(population)).unsqueeze(0),
@@ -39,4 +41,7 @@ class GeneticAlgorithmTorch:
                 solutions.append((x, value))  # generate a vector of pairs (solution, fitness value)
             optimizer.tell(solutions)  # we tell CMA-ES what are the solutions and the corresponding fitness
             all_solutions.append(solutions)
+        self.times += self.lower.total_time
+        self.times = np.array(self.times)
+        self.times = self.times - self.times[0]
         return all_solutions

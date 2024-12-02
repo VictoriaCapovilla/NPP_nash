@@ -6,7 +6,7 @@ import torch
 from Instance.instance import Instance
 
 
-class LowerTorch:
+class LowerLevel:
 
     def __init__(self, instance: Instance, eps, device, M, reuse_p=False):
 
@@ -19,7 +19,6 @@ class LowerTorch:
 
         self.alpha = instance.alpha
         self.beta = instance.beta
-        self.gamma = instance.gamma
 
         self.total_paths = instance.n_paths + 1
         self.q = torch.zeros_like(self.travel_time).to(self.device)
@@ -27,8 +26,6 @@ class LowerTorch:
                                       repeats=self.n_od, dim=0)
         self.q[:, :-1] = q_p
         self.q[:, -1] = torch.tensor(instance.q_od, device=self.device)
-
-        # repeating for pop_size dim
 
         self.n_users = torch.tensor(np.array([instance.n_users for _ in range(self.total_paths)]), device=self.device).T
 
@@ -51,6 +48,8 @@ class LowerTorch:
         self.data_fit = []
         self.n_iter = []
         self.data_time = []
+
+        self.total_time = []
 
     def compute_probs(self, T):
         self.data_individuals.append(list(T[0].detach().cpu().numpy()))
@@ -116,4 +115,5 @@ class LowerTorch:
         fit = self.compute_fitness(probs)
 
         self.data_time.append(time.time() - t)
+        self.total_time.append(time.time())
         return fit
