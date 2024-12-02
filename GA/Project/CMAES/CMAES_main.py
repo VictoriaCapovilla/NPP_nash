@@ -52,15 +52,16 @@ for i in range(N_RUN):
         'time': time.time() - t,
         'upper_iter': ITERATIONS,
         'fitness': float(genetic_algorithm.lower.data_fit[-1]),
-        'best_individual': [genetic_algorithm.lower.data_individuals[-1]],
-        'lower_time': [genetic_algorithm.lower.data_time],
-        'lower_iter': [genetic_algorithm.lower.n_iter],
-        'fit_update': [genetic_algorithm.lower.data_fit],
-        'ind_update': [genetic_algorithm.lower.data_individuals],
+        'best_individual': np.array(genetic_algorithm.lower.data_individuals[-1]),
+        'total_time': genetic_algorithm.times,
+        'lower_time': np.array(genetic_algorithm.lower.data_time),
+        'lower_iter': np.array(genetic_algorithm.lower.n_iter),
+        'fit_update': np.array(genetic_algorithm.lower.data_fit),
+        'ind_update': np.array(genetic_algorithm.lower.data_individuals),
         'std': STD,
         'n_paths': genetic_algorithm.n_paths,
         'n_od': genetic_algorithm.instance.n_od,
-        'n_users': [genetic_algorithm.instance.n_users],
+        'n_users': np.array(genetic_algorithm.instance.n_users),
         'alpha': genetic_algorithm.instance.alpha,
         'beta': genetic_algorithm.instance.beta,
         'M': genetic_algorithm.M,
@@ -80,7 +81,7 @@ for i in range(N_RUN):
     print('Execution time:', time.time() - t, '\nRun', i, 'complete', '\n')
 
 total_df.to_csv(r'C:\Users\viki\Desktop\NPP\Results\10_4\CMA1_1', index=False)
-df = pd.read_csv(r'/Results/10_4/CMA1_1')
+df = pd.read_csv(r'C:\Users\viki\Desktop\NPP\Results\10_4\CMA1_1')
 
 x = np.array(range(0, 1000))
 y = to_matrix(df.fit_update[0])[0:]
