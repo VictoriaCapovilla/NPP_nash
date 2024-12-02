@@ -77,10 +77,11 @@ for i in range(N_RUN):
     else:
         total_df = pd.concat([total_df, df])
 
+    print('Fitness:', float(genetic_algorithm.lower.data_fit[-1]))
     print('Execution time:', time.time() - t, '\nRun', i, 'complete', '\n')
 
-total_df.to_csv(r'C:\Users\viki\Desktop\NPP\Results\10_4\CMA1_1', index=False)
-df = pd.read_csv(r'C:\Users\viki\Desktop\NPP\Results\10_4\CMA1_1')
+total_df.to_csv('/home/capovilla/Scrivania/NPP_nash/Results/10_4/CMA1_1', index=False)
+df = pd.read_csv('/home/capovilla/Scrivania/NPP_nash/Results/10_4/CMA1_1')
 
 x = np.array(range(0, 1000))
 y = to_matrix(df.fit_update[0])[0:]
