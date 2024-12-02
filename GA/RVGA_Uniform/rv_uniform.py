@@ -8,7 +8,7 @@ from sympy import zeros
 from GA.lower_level_torch import LowerTorch
 
 
-class GeneticAlgorithmTorch:
+class RVGA_Uniform:
 
     def __init__(self, instance, pop_size, offspring_proportion=0.5, lower_eps=10**(-12),
                  device=None, reuse_p=False):
@@ -46,7 +46,7 @@ class GeneticAlgorithmTorch:
 
         self.obj_val = 0
 
-    def run(self, iterations, mutation_range):
+    def run_um(self, iterations, mutation_range):
         for _ in range(iterations):
             # SELECTION
             self.parents = self.parents_idxs[torch.randperm(self.parents_idxs.shape[0])[:self.n_children]]
