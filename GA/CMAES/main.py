@@ -31,6 +31,7 @@ PATHS = 10
 N_OD = 4
 ITERATIONS = 100
 LOWER_EPS = 10**(-4)
+STD = 1.1
 
 N_RUN = 6
 
@@ -44,7 +45,7 @@ for i in range(N_RUN):
     t = time.time()
     genetic_algorithm = GeneticAlgorithmTorch(instance, lower_eps=LOWER_EPS, device=device, reuse_p=None)
 
-    sol = genetic_algorithm.run_CMA(ITERATIONS, 1.1)
+    sol = genetic_algorithm.run_CMA(ITERATIONS, STD)
 
 
     # creating dataframe
@@ -57,6 +58,7 @@ for i in range(N_RUN):
         'lower_iter': [genetic_algorithm.lower.n_iter],
         'fit_update': [genetic_algorithm.lower.data_fit],
         'ind_update': [genetic_algorithm.lower.data_individuals],
+        'std': STD,
         'n_paths': genetic_algorithm.n_paths,
         'n_od': genetic_algorithm.instance.n_od,
         'n_users': [genetic_algorithm.instance.n_users],
@@ -77,8 +79,8 @@ for i in range(N_RUN):
 
     print('Execution time:', time.time() - t, '\nRun', i, 'complete', '\n')
 
-total_df.to_csv(r'C:\Users\viki\Desktop\NPP\GA\CMAES\study', index=False)
-df = pd.read_csv(r'C:\Users\viki\Desktop\NPP\GA\CMAES\study')
+total_df.to_csv(r'C:\Users\viki\Desktop\NPP\Results\10_4\CMA1_1', index=False)
+df = pd.read_csv(r'C:\Users\viki\Desktop\NPP\Results\10_4\CMA1_1')
 
 x = np.array(range(0, 1000))
 y = to_matrix(df.fit_update[0])[0:]
