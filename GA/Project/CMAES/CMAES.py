@@ -10,12 +10,13 @@ from GA.Project.lower_level import LowerLevel
 
 class CMAES:
 
-    def __init__(self, instance, lower_eps=10**(-12), device=None, reuse_p=False):
+    def __init__(self, instance, lower_eps=10**(-12), pop_size=None, device=None, reuse_p=False):
 
         self.device = device
         self.instance = instance
 
         self.n_paths = self.instance.n_paths
+        self.pop_size = pop_size
 
         self.M = (self.instance.travel_time[:, -1] * (
                 1 + self.instance.alpha * (self.instance.n_users / self.instance.q_od) ** self.instance.beta)).max()
@@ -31,7 +32,11 @@ class CMAES:
 
     def run_CMA(self, iterations, sigma):
         self.times.append(time.time())
-        optimizer = CMA(mean=np.zeros(self.n_paths), sigma=sigma, bounds=(np.array([[0, self.M]] * self.n_paths)))
+        if self.pop_size is not None:
+            optimizer = CMA(mean=np.zeros(self.n_paths), sigma=sigma, bounds=(np.array([[0, self.M]] * self.n_paths)),
+                            population_size=self.pop_size)
+        else:
+            optimizer = CMA(mean=np.zeros(self.n_paths), sigma=sigma, bounds=(np.array([[0, self.M]] * self.n_paths)))
         all_solutions = []
         for generation in range(iterations):
             solutions = []
