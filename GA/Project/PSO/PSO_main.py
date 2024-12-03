@@ -29,7 +29,7 @@ torch.manual_seed(seed)
 
 PATHS = 10
 N_OD = 4
-POP_SIZE = 256
+# POP_SIZE = 256
 ITERATIONS = 100
 LOWER_EPS = 10**(-4)
 
@@ -43,7 +43,7 @@ total_df = None
 
 for i in range(N_RUN):
     t = time.time()
-    genetic_algorithm = PSO(instance, POP_SIZE, lower_eps=LOWER_EPS, device=device, reuse_p=None)
+    genetic_algorithm = PSO(instance, pop_size=None, lower_eps=LOWER_EPS, device=device, reuse_p=None)
 
     genetic_algorithm.run_PSO(ITERATIONS)
 
