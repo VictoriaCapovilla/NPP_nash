@@ -32,11 +32,8 @@ class CMAES:
 
     def run_CMA(self, iterations, sigma):
         self.times.append(time.time())
-        if self.pop_size is not None:
-            optimizer = CMA(mean=np.zeros(self.n_paths), sigma=sigma, bounds=(np.array([[0, self.M]] * self.n_paths)),
-                            population_size=self.pop_size)
-        else:
-            optimizer = CMA(mean=np.zeros(self.n_paths), sigma=sigma, bounds=(np.array([[0, self.M]] * self.n_paths)))
+        optimizer = CMA(mean=np.zeros(self.n_paths), sigma=sigma, bounds=(np.array([[0, self.M]] * self.n_paths)),
+                        population_size=self.pop_size)
         all_solutions = []
         for generation in range(iterations):
             solutions = []
