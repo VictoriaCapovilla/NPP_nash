@@ -16,8 +16,9 @@ from Instance.instance import Instance
 
 # Convert the cleaned string to an array
 def to_matrix(a):
-    cleaned_string = (a.replace('\r\n', ' ').replace('\n', ' ').strip().replace('   ', ' ').replace('  ', ' ')
-                      .replace('[ ', '[').replace(' ]', ']').replace(' ', ',').replace(',,', ',').replace(',,', ','))
+    cleaned_string = (a.replace('\r\n', ' ').replace('\n', ' ').replace('array(', '').replace('np.float64(', '')
+                      .strip().replace('   ', ' ').replace('  ', ' ').replace('[ ', '[').replace(' ]', ']')
+                      .replace('(', '').replace(')', '').replace(' ', ',').replace(',,', ',').replace(',,', ','))
 
     return np.array(ast.literal_eval(cleaned_string))
 
