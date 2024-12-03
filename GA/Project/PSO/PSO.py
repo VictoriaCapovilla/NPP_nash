@@ -42,4 +42,4 @@ class PSO:
         print("Whose fitness is:", self.obj_val)
         self.times += self.lower.total_time
         self.times = np.array(self.times)
-        self.times = self.times - self.times[0]
+        self.times = list(self.times - self.times[0])

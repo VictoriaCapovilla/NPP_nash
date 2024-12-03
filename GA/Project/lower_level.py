@@ -52,7 +52,7 @@ class LowerLevel:
         self.total_time = []
 
     def compute_probs(self, T):
-        self.data_individuals.append(T[0])
+        self.data_individuals.append(list(T[0].detach().cpu().numpy()))
 
         self.costs[:, : -1] = T
 
@@ -105,7 +105,7 @@ class LowerLevel:
 
     def compute_fitness(self, probs):
         fitness = (self.costs[:, :-1] * probs[:, :-1] * self.n_users[:, :-1]).sum()
-        self.data_fit.append(torch.abs(fitness))
+        self.data_fit.append(float(torch.abs(fitness)))
         return fitness
 
     def eval(self, T):

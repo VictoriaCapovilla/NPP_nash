@@ -51,15 +51,15 @@ for i in range(N_RUN):
         'time': time.time() - t,
         'upper_iter': ITERATIONS,
         'fitness': float(genetic_algorithm.obj_val),
-        'best_individual': np.array(genetic_algorithm.lower.data_individuals[-1]),
-        'total_time': genetic_algorithm.times,
-        'lower_time': np.array(genetic_algorithm.lower.data_time),
-        'lower_iter': np.array(genetic_algorithm.lower.n_iter),
-        'fit_update': np.array(genetic_algorithm.lower.data_fit),
-        'ind_update': np.array(genetic_algorithm.lower.data_individuals),
+        'best_individual': [genetic_algorithm.lower.data_individuals[-1]],
+        'upper_time': [genetic_algorithm.times],
+        'lower_time': [genetic_algorithm.lower.data_time],
+        'lower_iter': [genetic_algorithm.lower.n_iter],
+        'fit_update': [genetic_algorithm.lower.data_fit],
+        'ind_update': [genetic_algorithm.lower.data_individuals],
         'n_paths': genetic_algorithm.n_paths,
         'n_od': genetic_algorithm.instance.n_od,
-        'n_users': np.array(genetic_algorithm.instance.n_users),
+        'n_users': [genetic_algorithm.instance.n_users],
         # 'pop_size': genetic_algorithm.pop_size,
         'alpha': genetic_algorithm.instance.alpha,
         'beta': genetic_algorithm.instance.beta,
@@ -78,14 +78,15 @@ for i in range(N_RUN):
 
     print('Execution time:', time.time() - t, '\nRun', i, 'complete', '\n')
 
-total_df.to_csv(r'C:\Users\viki\Desktop\Results\10_4\PSOstudy', index=False)
-df = pd.read_csv(r'C:\Users\viki\Desktop\Results\10_4\PSOstudy')
+total_df.to_csv(r'C:\Users\viki\Desktop\NPP\Results\10_4\PSOstudy', index=False)
+df = pd.read_csv(r'C:\Users\viki\Desktop\NPP\Results\10_4\PSO100')
 
-x = np.array(range(0, 1632))
-y = to_matrix(df.fit_update[0])[0:]
-plt.title("Plotting PSO")
-plt.xlabel("")
+for i in range(N_RUN):
+    x = to_matrix(df.total_time[i])[1:]
+    y = to_matrix(df.fit_update[i])
+    plt.plot(x, y, label=str(i))
+plt.title("Plotting CMA-ES")
+plt.xlabel("time")
 plt.ylabel("fitness")
-plt.plot(x, y, color="purple", label="Array elements")
 plt.legend()
 plt.show()

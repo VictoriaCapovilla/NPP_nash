@@ -43,5 +43,5 @@ class CMAES:
             all_solutions.append(solutions)
         self.times += self.lower.total_time
         self.times = np.array(self.times)
-        self.times = self.times - self.times[0]
+        self.times = list(self.times - self.times[0])
         return all_solutions

@@ -43,8 +43,10 @@ class GeneticAlgorithmTorch:
         self.data_individuals.append(self.population[0].detach().cpu().numpy())
 
         self.obj_val = 0
+        self.times = []
 
     def run(self, iterations):
+        self.times.append(time.time())
         for _ in range(iterations):
             # selection
             self.parents = self.parents_idxs[torch.randperm(self.parents_idxs.shape[0])[:self.n_children]]
@@ -80,3 +82,7 @@ class GeneticAlgorithmTorch:
 
         # print('costs =\n', self.population[0])
         # print('fitness =\n', self.vals[0])
+
+        self.times += self.lower.total_time
+        self.times = np.array(self.times)
+        self.times = list(self.times - self.times[0])

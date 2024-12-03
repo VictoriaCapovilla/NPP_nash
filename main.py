@@ -1,3 +1,4 @@
+import ast
 import time
 
 import numpy as np
@@ -7,8 +8,19 @@ import torch
 
 import pandas as pd
 
+import matplotlib.pyplot as plt
+
 from GA.genetic_algorithm_torch import GeneticAlgorithmTorch
 from Instance.instance import Instance
+
+
+# Convert the cleaned string to an array
+def to_matrix(a):
+    cleaned_string = (a.replace('\r\n', ' ').replace('\n', ' ').strip().replace('   ', ' ').replace('  ', ' ')
+                      .replace('[ ', '[').replace(' ]', ']').replace(' ', ',').replace(',,', ',').replace(',,', ','))
+
+    return np.array(ast.literal_eval(cleaned_string))
+
 
 seed = 0
 np.random.seed(seed)
@@ -43,6 +55,7 @@ for i in range(N_RUN):
         # 'upper_iter': ITERATIONS,
         'fitness': float(genetic_algorithm.obj_val),
         'best_individual': [genetic_algorithm.data_individuals[-1]],
+        'upper_time': [genetic_algorithm.times],
         'lower_time': [genetic_algorithm.lower.data_time],
         'lower_iter': [genetic_algorithm.lower.n_iter],
         'fit_update': [genetic_algorithm.data_fit],
@@ -72,3 +85,13 @@ for i in range(N_RUN):
 
 total_df.to_csv(r'C:/Users/viki/Desktop/NPP/Results/output', index=False)
 df = pd.read_csv('C:/Users/viki/Desktop/NPP/Results/output')
+
+for i in range(N_RUN):
+    x = to_matrix(df.total_time[i])[1:]
+    y = to_matrix(df.fit_update[i])
+    plt.plot(x, y, label=str(i))
+plt.title("Plotting GATorch")
+plt.xlabel("time")
+plt.ylabel("fitness")
+plt.legend()
+plt.show()
