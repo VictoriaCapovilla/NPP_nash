@@ -10,12 +10,13 @@ from GA.Project.lower_level import LowerLevel
 
 class PSO:
 
-    def __init__(self, instance, lower_eps=10**(-12), device=None, reuse_p=False):
+    def __init__(self, instance, pop_size, lower_eps=10**(-12), device=None, reuse_p=False):
 
         self.device = device
         self.instance = instance
 
         self.n_paths = self.instance.n_paths
+        self.pop_size = pop_size
 
         self.M = (self.instance.travel_time[:, -1] * (
                 1 + self.instance.alpha * (self.instance.n_users / self.instance.q_od) ** self.instance.beta)).max()
@@ -36,6 +37,7 @@ class PSO:
         FP = FuzzyPSO()
         FP.set_search_space([[0, self.M]] * dims)
         FP.set_fitness(self.fitness_evaluation)
+        FP.set_swarm_size(self.pop_size)
         result = FP.solve_with_fstpso(max_iter=max_iter)
         print("Best solution:", result[0])
         self.obj_val = torch.abs(result[1]).detach().cpu().numpy()
