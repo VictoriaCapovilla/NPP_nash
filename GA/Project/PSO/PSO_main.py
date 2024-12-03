@@ -79,13 +79,13 @@ for i in range(N_RUN):
     print('Execution time:', time.time() - t, '\nRun', i, 'complete', '\n')
 
 total_df.to_csv(r'C:\Users\viki\Desktop\NPP\Results\10_4\PSOstudy', index=False)
-df = pd.read_csv(r'C:\Users\viki\Desktop\NPP\Results\10_4\PSO100')
+df = pd.read_csv(r'C:\Users\viki\Desktop\NPP\Results\10_4\PSOstudy')
 
 for i in range(N_RUN):
     x = to_matrix(df.total_time[i])[1:]
     y = to_matrix(df.fit_update[i])
     plt.plot(x, y, label=str(i))
-plt.title("Plotting CMA-ES")
+plt.title("Plotting PSO")
 plt.xlabel("time")
 plt.ylabel("fitness")
 plt.legend()
