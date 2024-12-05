@@ -10,7 +10,8 @@ import pandas as pd
 
 import matplotlib.pyplot as plt
 
-from GA.Project.PSO.PSO import PSO
+# from GA.Project.PSO.FST_PSO import FST_PSO
+from GA.Project.PSO.New import New_PSO
 from Instance.instance import Instance
 
 
@@ -29,7 +30,7 @@ torch.manual_seed(seed)
 
 PATHS = 10
 N_OD = 4
-POP_SIZE = 16       # default 16
+POP_SIZE = None       # default 16
 ITERATIONS = 100
 LOWER_EPS = 10**(-4)
 
@@ -43,9 +44,18 @@ total_df = None
 
 for i in range(N_RUN):
     t = time.time()
-    genetic_algorithm = PSO(instance, pop_size=POP_SIZE, lower_eps=LOWER_EPS, device=device, reuse_p=None)
 
-    genetic_algorithm.run_PSO(ITERATIONS)
+    # clssic PSO
+    # genetic_algorithm = FST_PSO(instance, pop_size=POP_SIZE, lower_eps=LOWER_EPS, device=device, reuse_p=None)
+
+    # genetic_algorithm.run_FST_PSO(ITERATIONS)
+
+    # fuzzy self-tuning PSO
+    genetic_algorithm = New_PSO(instance, pop_size=POP_SIZE, lower_eps=LOWER_EPS, device=device, reuse_p=None)
+
+    best, hist = genetic_algorithm.run_newpso(10, [[0, genetic_algorithm.M]] * genetic_algorithm.n_paths,
+                                              [[0.001, 1]] * genetic_algorithm.n_paths, 50,
+                                              lambda p: genetic_algorithm.fitness_evaluation(p))
 
     # creating dataframe
     data = {
@@ -82,7 +92,7 @@ for i in range(N_RUN):
 total_df.to_csv(r'C:\Users\viki\Desktop\NPP\Results\10_4\PSOstudy', index=False)
 df = pd.read_csv(r'C:\Users\viki\Desktop\NPP\Results\10_4\PSOstudy')
 
-for i in range(N_RUN):
+for i in range(df.shape[0]):
     x = to_matrix(df.upper_time[i])[1:]
     y = to_matrix(df.fit_update[i])
     plt.plot(x, y, label=str(i))
