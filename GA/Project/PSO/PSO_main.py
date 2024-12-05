@@ -11,7 +11,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 # from GA.Project.PSO.FST_PSO import FST_PSO
-from GA.Project.PSO.New import New_PSO
+from GA.Project.PSO.PSO import PSO
 from Instance.instance import Instance
 
 
@@ -51,7 +51,7 @@ for i in range(N_RUN):
     # genetic_algorithm.run_FST_PSO(ITERATIONS)
 
     # fuzzy self-tuning PSO
-    genetic_algorithm = New_PSO(instance, pop_size=POP_SIZE, lower_eps=LOWER_EPS, device=device, reuse_p=None)
+    genetic_algorithm = PSO(instance, pop_size=POP_SIZE, lower_eps=LOWER_EPS, device=device, reuse_p=None)
 
     best, hist = genetic_algorithm.run_newpso(10, [[0, genetic_algorithm.M]] * genetic_algorithm.n_paths,
                                               [[0.001, 1]] * genetic_algorithm.n_paths, 50,
