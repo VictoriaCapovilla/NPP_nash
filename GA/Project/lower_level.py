@@ -52,7 +52,7 @@ class LowerLevel:
         self.total_time = []
 
     def compute_probs(self, T):
-        self.data_individuals.append(list(T[0].detach().cpu().numpy()))
+        self.data_individuals.append(T[0].detach().cpu().numpy())
 
         self.costs[:, : -1] = T
 

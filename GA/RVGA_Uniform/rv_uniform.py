@@ -79,7 +79,7 @@ class RVGA_Uniform:
             self.population = self.population[fitness_order]
             self.vals = self.vals[fitness_order]
 
-            self.data_individuals.append(list(self.population[0].detach().cpu().numpy()))
+            self.data_individuals.append(self.population[0].detach().cpu().numpy())
             self.data_fit.append(float(self.vals[0]))
             # print(self.vals[0])
 
