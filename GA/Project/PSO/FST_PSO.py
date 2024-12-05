@@ -8,7 +8,7 @@ from fstpso import FuzzyPSO
 from GA.Project.lower_level import LowerLevel
 
 
-class PSO:
+class FST_PSO:
 
     def __init__(self, instance, lower_eps=10**(-12), pop_size=None, device=None, reuse_p=False):
 
@@ -31,7 +31,7 @@ class PSO:
                                              repeats=self.instance.n_od, dim=0)
         return - self.lower.eval(torch.from_numpy(np.array(population)))
 
-    def run_PSO(self, max_iter):
+    def run_FST_PSO(self, max_iter):
         self.times.append(time.time())
         dims = self.n_paths
         FP = FuzzyPSO()
