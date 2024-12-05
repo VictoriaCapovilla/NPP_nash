@@ -10,8 +10,8 @@ import pandas as pd
 
 import matplotlib.pyplot as plt
 
-# from GA.Project.PSO.FST_PSO import FST_PSO
-from GA.Project.PSO.PSO import PSO
+from GA.Project.PSO.FST_PSO import FST_PSO
+# from GA.Project.PSO.PSO import PSO
 from Instance.instance import Instance
 
 
@@ -30,7 +30,7 @@ torch.manual_seed(seed)
 
 PATHS = 10
 N_OD = 4
-POP_SIZE = None       # default 16
+SWARM_SIZE = None       # PSO default 10, FST-PSO default 16
 ITERATIONS = 100
 LOWER_EPS = 10**(-4)
 
@@ -45,17 +45,15 @@ total_df = None
 for i in range(N_RUN):
     t = time.time()
 
-    # clssic PSO
-    # genetic_algorithm = FST_PSO(instance, pop_size=POP_SIZE, lower_eps=LOWER_EPS, device=device, reuse_p=None)
+    # classic PSO
+    genetic_algorithm = FST_PSO(instance, swarm_size=SWARM_SIZE, lower_eps=LOWER_EPS, device=device, reuse_p=None)
 
-    # genetic_algorithm.run_FST_PSO(ITERATIONS)
+    genetic_algorithm.run_FST_PSO(ITERATIONS)
 
     # fuzzy self-tuning PSO
-    genetic_algorithm = PSO(instance, pop_size=POP_SIZE, lower_eps=LOWER_EPS, device=device, reuse_p=None)
-
-    best, hist = genetic_algorithm.run_newpso(10, [[0, genetic_algorithm.M]] * genetic_algorithm.n_paths,
-                                              [[0.001, 1]] * genetic_algorithm.n_paths, 50,
-                                              lambda p: genetic_algorithm.fitness_evaluation(p))
+    # genetic_algorithm = PSO(instance, lower_eps=LOWER_EPS, device=device, reuse_p=None)
+    #
+    # hist = genetic_algorithm.run_PSO(ITERATIONS, swarm_size=SWARM_SIZE, max_velocity=[[0.001, 1]])
 
     # creating dataframe
     data = {
@@ -71,7 +69,10 @@ for i in range(N_RUN):
         'n_paths': genetic_algorithm.n_paths,
         'n_od': genetic_algorithm.instance.n_od,
         'n_users': [genetic_algorithm.instance.n_users],
-        'pop_size': genetic_algorithm.pop_size,
+        'swarm_size': SWARM_SIZE,
+        # 'c_soc': genetic_algorithm.c_soc,
+        # 'c_cog': genetic_algorithm.c_cog,
+        # 'w': genetic_algorithm.w,
         'alpha': genetic_algorithm.instance.alpha,
         'beta': genetic_algorithm.instance.beta,
         'M': genetic_algorithm.M,
