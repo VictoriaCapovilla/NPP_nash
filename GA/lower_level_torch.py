@@ -8,9 +8,10 @@ from Instance.instance import Instance
 
 class LowerTorch:
 
-    def __init__(self, instance: Instance, eps, mat_size, device, M, reuse_p=False):
+    def __init__(self, instance: Instance, eps, mat_size, device, M, reuse_p=False, save=False):
 
         # set require grad False
+        self.save = save
         self.reuse_p = reuse_p
         self.device = device
         self.mat_size = mat_size
@@ -53,12 +54,12 @@ class LowerTorch:
         else:
             self.p_old = None
 
-        self.n_iter = []
-        self.data_payoffs = []
-        self.data_probs = []
-        self.data_time = []
-
-        self.total_time = []
+        if self.save:
+            self.n_iter = []
+            self.data_payoffs = []
+            self.data_probs = []
+            self.data_time = []
+            self.total_time = []
 
     def compute_probs(self, T):
         T = torch.repeat_interleave(T.unsqueeze(1), repeats=self.n_od, dim=1)
@@ -95,8 +96,7 @@ class LowerTorch:
             m_average = torch.repeat_interleave(m_average, repeats=p_old.shape[2], dim=2)
 
             # updated probabilities
-            p_new = torch.round(p_old * self.m_old / m_average, decimals=3)
-            p_new = p_new / torch.repeat_interleave(p_new.sum(dim=2).unsqueeze(2), repeats=self.total_paths, dim=2)
+            p_new = p_old * self.m_old / m_average
 
             # updated payoff
             prod = self.n_users * p_new
@@ -107,8 +107,9 @@ class LowerTorch:
                         1 + self.alpha * (prod[:, :, -1] / self.q[:, :, -1]) ** self.beta)
 
             iter += 1
-        self.n_iter.append(iter)
-        self.data_payoffs.append(self.m_new[0].detach().cpu().numpy())
+        if self.save:
+            self.n_iter.append(iter)
+            self.data_payoffs.append(self.m_new[0].detach().cpu().numpy())
         # print(iter)
 
         if self.reuse_p:
@@ -125,7 +126,8 @@ class LowerTorch:
         probs = self.compute_probs(T)
         fit = self.compute_fitness(probs)
 
-        self.data_probs.append(np.round(probs[0].detach().cpu().numpy(), 4))
-        self.data_time.append(time.time() - t)
-        self.total_time.append(time.time())
+        if self.save:
+            self.data_probs.append(probs[0].detach().cpu().numpy())
+            self.data_time.append(time.time() - t)
+            self.total_time.append(time.time())
         return fit

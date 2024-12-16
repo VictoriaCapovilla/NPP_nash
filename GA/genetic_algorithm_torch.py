@@ -9,8 +9,9 @@ from GA.lower_level_torch import LowerTorch
 
 class GeneticAlgorithmTorch:
 
-    def __init__(self, instance, pop_size, offspring_proportion=0.5, lower_eps=10**(-12), device=None, reuse_p=False):
+    def __init__(self, instance, pop_size, offspring_proportion=0.5, lower_eps=10**(-12), device=None, reuse_p=False, save=False):
 
+        self.save = save
         self.device = device
         self.instance = instance
 
@@ -24,7 +25,7 @@ class GeneticAlgorithmTorch:
         self.M = (self.instance.travel_time[:, -1] * (
                 1 + self.instance.alpha * (self.instance.n_users / self.instance.q_od) ** self.instance.beta)).max()
 
-        self.lower = LowerTorch(self.instance, lower_eps, mat_size=self.mat_size, device=device, M=self.M, reuse_p=reuse_p)
+        self.lower = LowerTorch(self.instance, lower_eps, mat_size=self.mat_size, device=device, M=self.M, reuse_p=reuse_p, save=save)
 
         # initialization
         self.population = torch.rand(size=(self.mat_size, self.n_paths), device=self.device) * self.M
@@ -36,17 +37,21 @@ class GeneticAlgorithmTorch:
         self.vals = torch.zeros(self.mat_size, device=self.device)
         self.vals = self.lower.eval(self.population)
 
-        self.data_fit = []
-        self.data_fit.append(float(self.vals[0]))
+        if self.save:
+            self.data_fit = []
+            self.data_fit.append(float(self.vals[np.argsort(-self.vals.to('cpu'))][0]))
 
-        self.data_individuals = []
-        self.data_individuals.append(self.population[0].detach().cpu().numpy())
+            self.data_individuals = []
+            self.data_individuals.append(self.population[np.argsort(-self.vals.to('cpu'))][0].detach().cpu().numpy())
+
+            self.times = []
 
         self.obj_val = 0
-        self.times = []
 
     def run(self, iterations):
-        self.times.append(time.time())
+        if self.save:
+            self.times.append(time.time())
+
         for _ in range(iterations):
             # selection
             self.parents = self.parents_idxs[torch.randperm(self.parents_idxs.shape[0])[:self.n_children]]
@@ -74,8 +79,9 @@ class GeneticAlgorithmTorch:
             self.population = self.population[fitness_order]
             self.vals = self.vals[fitness_order]
 
-            self.data_individuals.append(self.population[0].detach().cpu().numpy())
-            self.data_fit.append(float(self.vals[0]))
+            if self.save:
+                self.data_individuals.append(self.population[0].detach().cpu().numpy())
+                self.data_fit.append(float(self.vals[0]))
             # print(self.vals[0])
 
         self.obj_val = self.vals[0]
@@ -83,6 +89,7 @@ class GeneticAlgorithmTorch:
         # print('costs =\n', self.population[0])
         # print('fitness =\n', self.vals[0])
 
-        self.times += self.lower.total_time
-        self.times = np.array(self.times)
-        self.times = list(self.times - self.times[0])
+        if self.save:
+            self.times += self.lower.total_time
+            self.times = np.array(self.times)
+            self.times = list(self.times - self.times[0])
