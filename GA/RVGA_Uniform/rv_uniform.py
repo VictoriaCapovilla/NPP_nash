@@ -11,8 +11,9 @@ from GA.lower_level_torch import LowerTorch
 class RVGA_Uniform:
 
     def __init__(self, instance, pop_size, offspring_proportion=0.5, lower_eps=10**(-12),
-                 device=None, reuse_p=False):
+                 device=None, reuse_p=False, save=False):
 
+        self.save = save
         self.device = device
         self.instance = instance
 
@@ -38,17 +39,20 @@ class RVGA_Uniform:
         self.vals = torch.zeros(self.mat_size, device=self.device)
         self.vals = self.lower.eval(self.population)
 
-        self.data_fit = []
-        self.data_fit.append(float(self.vals[np.argsort(-self.vals.to('cpu'))][0]))
+        if self.save:
+            self.data_fit = []
+            self.data_fit.append(float(self.vals[np.argsort(-self.vals.to('cpu'))][0]))
 
-        self.data_individuals = []
-        self.data_individuals.append(self.population[np.argsort(-self.vals.to('cpu'))][0].detach().cpu().numpy())
+            self.data_individuals = []
+            self.data_individuals.append(self.population[np.argsort(-self.vals.to('cpu'))][0].detach().cpu().numpy())
+
+            self.times = []
 
         self.obj_val = 0
-        self.times = []
 
     def run_um(self, iterations, mutation_range):
-        self.times.append(time.time())
+        if self.save:
+            self.times.append(time.time())
         for _ in range(iterations):
             # SELECTION
             self.parents = self.parents_idxs[torch.randperm(self.parents_idxs.shape[0])[:self.n_children]]
@@ -79,8 +83,9 @@ class RVGA_Uniform:
             self.population = self.population[fitness_order]
             self.vals = self.vals[fitness_order]
 
-            self.data_individuals.append(self.population[0].detach().cpu().numpy())
-            self.data_fit.append(float(self.vals[0]))
+            if self.save:
+                self.data_individuals.append(self.population[0].detach().cpu().numpy())
+                self.data_fit.append(float(self.vals[0]))
             # print(self.vals[0])
 
         self.obj_val = self.vals[0]
@@ -88,6 +93,7 @@ class RVGA_Uniform:
         # print('costs =\n', self.population[0])
         # print('fitness =\n', self.vals[0])
 
-        self.times += self.lower.total_time
-        self.times = np.array(self.times)
-        self.times = list(self.times - self.times[0])
+        if self.save:
+            self.times += self.lower.total_time
+            self.times = np.array(self.times)
+            self.times = list(self.times - self.times[0])
