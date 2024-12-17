@@ -7,7 +7,7 @@ from Instance.instance import Instance
 
 class LowerLevel:
 
-    def __init__(self, instance: Instance, eps, M, save=False):
+    def __init__(self, instance: Instance, eps, M, save):
 
         # set require grad False
         self.save = save

@@ -8,7 +8,7 @@ from Instance.instance import Instance
 
 class LowerTorch:
 
-    def __init__(self, instance: Instance, eps, mat_size, device, M, reuse_p=False, save=False):
+    def __init__(self, instance: Instance, eps, mat_size, device, M, save, reuse_p=False):
 
         # set require grad False
         self.save = save
