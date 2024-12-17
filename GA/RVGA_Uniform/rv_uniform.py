@@ -26,7 +26,7 @@ class RVGA_Uniform:
         self.M = (self.instance.travel_time[:, -1] * (
                 1 + self.instance.alpha * (self.instance.n_users / self.instance.q_od) ** self.instance.beta)).max()
 
-        self.lower = LowerTorch(self.instance, lower_eps, mat_size=self.mat_size, device=device, M=self.M, reuse_p=reuse_p)
+        self.lower = LowerTorch(self.instance, lower_eps, mat_size=self.mat_size, device=device, M=self.M, reuse_p=reuse_p, save=save)
 
         # initialization
         self.population = torch.rand(size=(self.mat_size, self.n_paths), device=self.device) * self.M
