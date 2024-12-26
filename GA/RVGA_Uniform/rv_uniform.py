@@ -29,7 +29,7 @@ class RVGA_Uniform:
                 1 + self.instance.alpha * (self.instance.n_users / self.instance.q_od) ** self.instance.beta)).max()
 
         if mutation_range is None:
-            self.mutation_range = [-8, 8]
+            self.mutation_range = [-1, 1]
         else:
             self.mutation_range = mutation_range
 
