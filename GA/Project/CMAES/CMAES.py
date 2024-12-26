@@ -30,22 +30,19 @@ class CMAES:
                                              (self.n_od, self.n_paths)))
         return - self.lower.eval(individual)
 
-    def run_CMA(self, iterations, pop_size, sigma=0.5):
+    def run_CMA(self, n_gen, pop_size):
         if self.save:
             self.times.append(time.time())
-        optimizer = CMA(mean=np.zeros(self.n_paths), sigma=sigma,
+        optimizer = CMA(mean=(self.M / 2 * np.ones(self.n_paths)), sigma=(self.M * 0.3),
                         bounds=(np.array([[0, self.M]] * self.n_paths)), population_size=pop_size)
-        all_solutions = []
-        for generation in range(iterations):
+        for generation in range(n_gen):
             solutions = []
             for _ in range(optimizer.population_size):
                 x = optimizer.ask()  # every time we need to ask the optimizer to sample a new solution
                 value = self.fitness_evaluation(x)  # compute the fitness
                 solutions.append((x, value))  # generate a vector of pairs (solution, fitness value)
             optimizer.tell(solutions)  # we tell CMA-ES what are the solutions and the corresponding fitness
-            all_solutions.append(solutions)
         if self.save:
             self.times += self.lower.total_time
             self.times = np.array(self.times)
             self.times = list(self.times - self.times[0])
-        return all_solutions

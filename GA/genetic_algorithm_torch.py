@@ -9,7 +9,8 @@ from GA.lower_level_torch import LowerTorch
 
 class GeneticAlgorithmTorch:
 
-    def __init__(self, instance, pop_size, offspring_proportion=0.5, lower_eps=10**(-12), device=None, reuse_p=False, save=False):
+    def __init__(self, instance, pop_size, offspring_proportion=0.5, lower_eps=10**(-12),
+                 device=None, reuse_p=False, save=False):
 
         self.save = save
         self.device = device
@@ -25,14 +26,16 @@ class GeneticAlgorithmTorch:
         self.M = (self.instance.travel_time[:, -1] * (
                 1 + self.instance.alpha * (self.instance.n_users / self.instance.q_od) ** self.instance.beta)).max()
 
-        self.lower = LowerTorch(self.instance, lower_eps, mat_size=self.mat_size, device=device, M=self.M, reuse_p=reuse_p, save=save)
+        self.lower = LowerTorch(self.instance, lower_eps, mat_size=self.mat_size, device=device, M=self.M,
+                                reuse_p=reuse_p, save=save)
 
         # initialization
         self.population = torch.rand(size=(self.mat_size, self.n_paths), device=self.device) * self.M
         self.parents_idxs = torch.tensor([(i, j) for j in range(self.pop_size) for i in range(j + 1, self.pop_size)],
                                          device=self.device)
 
-        self.parents = self.parents_idxs[torch.randperm(self.parents_idxs.shape[0])[:self.n_children]]
+        self.parents = self.parents_idxs[torch.randperm(self.parents_idxs.shape[0],
+                                                        device=self.device)[:self.n_children]]
 
         self.vals = torch.zeros(self.mat_size, device=self.device)
         self.vals = self.lower.eval(self.population)
@@ -54,9 +57,10 @@ class GeneticAlgorithmTorch:
 
         for _ in range(iterations):
             # selection
-            self.parents = self.parents_idxs[torch.randperm(self.parents_idxs.shape[0])[:self.n_children]]
+            self.parents = self.parents_idxs[torch.randperm(self.parents_idxs.shape[0],
+                                                            device=self.device)[:self.n_children]]
 
-            self.mask[torch.randperm(self.mask.shape[0])[:self.mask.shape[0]//2]] = True
+            self.mask[torch.randperm(self.mask.shape[0], device=self.device)[:self.mask.shape[0]//2]] = True
 
             # crossover
             self.population[self.pop_size:] = \
@@ -68,8 +72,7 @@ class GeneticAlgorithmTorch:
             idxs = torch.argwhere(p < 0.02)
             idxs[:, 0] += self.pop_size
 
-            self.population[idxs[:, 0], idxs[:, 1]] = (torch.rand(size=(idxs.shape[0],), device=self.device) *
-                                                       self.M)
+            self.population[idxs[:, 0], idxs[:, 1]] = torch.rand(size=(idxs.shape[0],), device=self.device) * self.M
 
             self.mask[:] = False
 
@@ -82,14 +85,10 @@ class GeneticAlgorithmTorch:
             if self.save:
                 self.data_individuals.append(self.population[0].detach().cpu().numpy())
                 self.data_fit.append(float(self.vals[0]))
-            # print(self.vals[0])
-
-        self.obj_val = self.vals[0]
-
-        # print('costs =\n', self.population[0])
-        # print('fitness =\n', self.vals[0])
 
         if self.save:
             self.times += self.lower.total_time
             self.times = np.array(self.times)
             self.times = list(self.times - self.times[0])
+
+        return self.vals[0]
