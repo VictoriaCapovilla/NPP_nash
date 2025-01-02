@@ -29,7 +29,7 @@ class RVGA_Uniform:
                 1 + self.instance.alpha * (self.instance.n_users / self.instance.q_od) ** self.instance.beta)).max()
 
         if mutation_range is None:
-            self.mutation_range = [-1, 1]
+            self.mutation_range = [-self.M / 100, self.M / 100]
         else:
             self.mutation_range = mutation_range
 
@@ -77,8 +77,8 @@ class RVGA_Uniform:
                  + mutation_a)
         mutation = pop + noise
         # bounds check
-        torch.where(mutation < 0, 0, mutation)
-        torch.where(mutation > self.M, self.M, mutation)
+        mutation = torch.where(mutation < 0, 0, mutation)
+        mutation = torch.where(mutation > self.M, self.M, mutation)
         return mutation
 
     def run_um(self, generations):

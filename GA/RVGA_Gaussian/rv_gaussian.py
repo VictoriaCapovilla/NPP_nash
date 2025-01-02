@@ -66,8 +66,8 @@ class RVGA_Gaussian:
         noise = torch.repeat_interleave((torch.normal(mean, std)).unsqueeze(0), repeats=self.instance.n_paths, dim=0).T
         mutation = pop + noise
         # bounds check
-        torch.where(mutation < 0, 0, mutation)
-        torch.where(mutation > self.M, self.M, mutation)
+        mutation = torch.where(mutation < 0, 0, mutation)
+        mutation = torch.where(mutation > self.M, self.M, mutation)
         return mutation
 
     def run_gm(self, generations):
