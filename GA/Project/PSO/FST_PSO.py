@@ -28,8 +28,10 @@ class FST_PSO:
         self.obj_val = 0
 
     def fitness_evaluation(self, individual):
+        # adapting the individual to Lower Level requirements
         individual = np.transpose(np.reshape(np.repeat(np.array(individual), repeats=self.n_od),
                                              (self.n_od, self.n_paths)))
+        # return a negative value of the fitness since FST-PSO works with minimization
         return - self.lower.eval(individual)
 
     def run_FST_PSO(self, max_iter, swarm_size):
