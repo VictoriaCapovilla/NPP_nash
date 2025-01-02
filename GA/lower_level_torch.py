@@ -14,6 +14,7 @@ class LowerTorch:
         self.save = save
         self.reuse_p = reuse_p
         self.device = device
+
         self.mat_size = mat_size
         self.travel_time = torch.tensor(instance.travel_time).to(self.device)
 
@@ -30,7 +31,7 @@ class LowerTorch:
         self.q[:, :-1] = q_p
         self.q[:, -1] = torch.tensor(instance.q_od, device=self.device)
 
-        # repeating for pop_size dim
+        # adding a third dimension to the matrixes
         self.travel_time = torch.repeat_interleave(self.travel_time.unsqueeze(0), repeats=mat_size, dim=0)
         self.q = torch.repeat_interleave(self.q.unsqueeze(0), repeats=mat_size, dim=0)
 
@@ -84,6 +85,7 @@ class LowerTorch:
                                 1 + self.alpha * (prod[:, :, -1] / self.q[:, :, -1]) ** self.beta)
         self.m_new = self.m_old
 
+        # updating probabilities
         star = False
         iter = 0
         while (torch.abs(p_old - p_new) > self.eps).any() or not star:
