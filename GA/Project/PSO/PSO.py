@@ -23,9 +23,6 @@ class PSO:
         # initialize the Lower Level
         self.lower = LowerLevel(self.instance, lower_eps, M=self.M, save=save)
 
-        # define space boundaries
-        # self.boundaries = [[0, self.M]] * self.n_paths
-
         # parameters
         self.c_soc = c_soc
         self.c_cog = c_cog
@@ -38,7 +35,7 @@ class PSO:
 
     def update_position(self, position, velocity):
         new_position = position + velocity
-        for i in range(self.n_paths):
+        for i in range(0, self.n_paths):
             if new_position[i] < 0:
                 new_position[i] = 0
                 velocity[i] = - np.random.random() * velocity[i]    # the velocity direction change
@@ -76,7 +73,7 @@ class PSO:
             max_velocity=[[0.001,self.M/3]]
         # expand the velocity bounds to each dimension
         max_velocities = max_velocity * self.n_paths
-        positions = [np.array([np.random.random() * self.M for _ in range(self.n_paths)])
+        positions = [np.array([np.random.random() * self.M for _ in range(0, self.n_paths)])
                      for i in range(0, swarm_size)]
         velocities = [np.array([np.random.choice([-1, 1]) * np.random.uniform(v[0], v[1])
                                 for v in max_velocities]) for i in range(0, swarm_size)]
