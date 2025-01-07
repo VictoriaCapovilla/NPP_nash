@@ -14,12 +14,15 @@ class FST_PSO:
         self.save = save
         self.instance = instance
 
+        # network data
         self.n_od = self.instance.n_od
         self.n_paths = self.instance.n_paths
 
+        # calculate individuals maximum value
         self.M = (self.instance.travel_time[:, -1] * (
                 1 + self.instance.alpha * (self.instance.n_users / self.instance.q_od) ** self.instance.beta)).max()
 
+        # initialize the Lower Level
         self.lower = LowerLevel(self.instance, lower_eps, M=self.M, save=save)
 
         if self.save:
@@ -34,7 +37,7 @@ class FST_PSO:
         # return a negative value of the fitness since FST-PSO works with minimization
         return - self.lower.eval(individual)
 
-    def run_FST_PSO(self, max_iter, swarm_size):
+    def run_FST_PSO(self, max_iter, swarm_size = None):
         if self.save:
             self.times.append(time.time())
         dims = self.n_paths
@@ -44,7 +47,7 @@ class FST_PSO:
         if swarm_size is not None:
             FP.set_swarm_size(swarm_size)
         result = FP.solve_with_fstpso(max_iter=max_iter)
-        print("Best solution:", result[0])
+        print("Best solution:", [result[0]])
         self.obj_val = np.abs(result[1])
         print("Whose fitness is:", self.obj_val)
         if self.save:

@@ -1,3 +1,4 @@
+# importing needed packages
 import time
 
 import numpy as np
@@ -14,20 +15,25 @@ class CMAES:
         self.save = save
         self.instance = instance
 
+        # network data
         self.n_od = self.instance.n_od
         self.n_paths = self.instance.n_paths
 
+        # calculate individuals maximum value
         self.M = (self.instance.travel_time[:, -1] * (
                 1 + self.instance.alpha * (self.instance.n_users / self.instance.q_od) ** self.instance.beta)).max()
 
+        # initialize the Lower Level
         self.lower = LowerLevel(self.instance, lower_eps, M=self.M, save=save)
 
         if self.save:
             self.times = []
 
     def fitness_evaluation(self, individual):
+        # adapting the individual to Lower Level requirements
         individual = np.transpose(np.reshape(np.repeat(np.array(individual), repeats=self.n_od),
                                              (self.n_od, self.n_paths)))
+        # return a negative value of the fitness since CMA-ES works with minimization
         return - self.lower.eval(individual)
 
     def run_CMA(self, n_gen, pop_size):
@@ -38,7 +44,7 @@ class CMAES:
         for generation in range(n_gen):
             solutions = []
             for _ in range(optimizer.population_size):
-                x = optimizer.ask()  # every time we need to ask the optimizer to sample a new solution
+                x = optimizer.ask()  # sample a new solution
                 value = self.fitness_evaluation(x)  # compute the fitness
                 solutions.append((x, value))  # generate a vector of pairs (solution, fitness value)
             optimizer.tell(solutions)  # we tell CMA-ES what are the solutions and the corresponding fitness

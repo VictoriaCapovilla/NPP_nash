@@ -12,16 +12,21 @@ class PSO:
         self.save = save
         self.instance = instance
 
+        # network data
         self.n_od = self.instance.n_od
         self.n_paths = self.instance.n_paths
 
+        # calculate individuals maximum value
         self.M = (self.instance.travel_time[:, -1] * (
                 1 + self.instance.alpha * (self.instance.n_users / self.instance.q_od) ** self.instance.beta)).max()
 
+        # initialize the Lower Level
         self.lower = LowerLevel(self.instance, lower_eps, M=self.M, save=save)
 
-        self.boundaries = [[0, self.M]] * self.n_paths
+        # define space boundaries
+        # self.boundaries = [[0, self.M]] * self.n_paths
 
+        # parameters
         self.c_soc = c_soc
         self.c_cog = c_cog
         self.w = w
@@ -33,13 +38,13 @@ class PSO:
 
     def update_position(self, position, velocity):
         new_position = position + velocity
-        for i, b in enumerate(self.boundaries):
-            if new_position[i] < b[0]:
-                new_position[i] = b[0]
-                velocity[i] = - np.random.random() * velocity[i]  # the velocity direction is changed
-            elif new_position[i] > b[1]:
-                new_position[i] = b[1]
-                velocity[i] = - np.random.random() * velocity[i]
+        for i in range(self.n_paths):
+            if new_position[i] < 0:
+                new_position[i] = 0
+                velocity[i] = - np.random.random() * velocity[i]    # the velocity direction change
+            elif new_position[i] > self.M:
+                new_position[i] = self.M
+                velocity[i] = - np.random.random() * velocity[i]    # the velocity direction change
         return new_position
 
     def update_velocity(self, position, velocity, global_best, local_best, max_velocities):
@@ -50,7 +55,7 @@ class PSO:
         cognitive_component = self.c_cog * r2 * (local_best - position)
         inertia = self.w * velocity
         new_velocity = inertia + social_component + cognitive_component
-        # check we are not going above the maximum velocity:
+        # check the particle is not going outside the maximum velocity boundaries:
         for i, v in enumerate(max_velocities):
             if np.abs(new_velocity[i]) < v[0]:
                 new_velocity[i] = np.sign(new_velocity[i]) * v[0]
@@ -59,37 +64,37 @@ class PSO:
         return new_velocity
 
     def fitness_evaluation(self, individual):
+        # adapting the individual to Lower Level requirements
         individual = np.transpose(np.reshape(np.repeat(np.array(individual), repeats=self.n_od),
                                              (self.n_od, self.n_paths)))
-        return - self.lower.eval(individual)
+        return self.lower.eval(individual)
 
-    def run_PSO(self, n_iter, swarm_size, max_velocity):
+    def run_PSO(self, n_iter, swarm_size, max_velocity=None):
         if self.save:
             self.times.append(time.time())
+        if max_velocity is None:
+            max_velocity=[[0.001,self.M/3]]
+        # expand the velocity bounds to each dimension
         max_velocities = max_velocity * self.n_paths
-        positions = [np.array([np.random.random() * (b[1] - b[0]) + b[0] for b in self.boundaries])
+        positions = [np.array([np.random.random() * self.M for _ in range(self.n_paths)])
                      for i in range(0, swarm_size)]
         velocities = [np.array([np.random.choice([-1, 1]) * np.random.uniform(v[0], v[1])
                                 for v in max_velocities]) for i in range(0, swarm_size)]
-        local_best = positions  # initially (at the first generation)
-        global_best = min(positions, key=self.fitness_evaluation)
-        hist = [positions]
+        local_best = positions
+        global_best = max(positions, key=self.fitness_evaluation)
         # updating:
         for i in range(0, n_iter):
             velocities = [self.update_velocity(p, v, global_best, lb, max_velocities)
                           for p, v, lb in zip(positions, velocities, local_best)]
             positions = [self.update_position(p, v) for p, v in zip(positions, velocities)]
-            local_best = [min([p, lb], key=self.fitness_evaluation) for p, lb in zip(positions, local_best)]
-            global_best = min([min(positions, key=self.fitness_evaluation), global_best], key=self.fitness_evaluation)
-            hist.append(positions)
+            local_best = [max([p, lb], key=self.fitness_evaluation) for p, lb in zip(positions, local_best)]
+            global_best = max([max(positions, key=self.fitness_evaluation), global_best], key=self.fitness_evaluation)
         self.obj_val = np.abs(self.fitness_evaluation(global_best))
 
-        print("Best solution:", global_best)
+        print("PSO best solution:", global_best)
         print("Whose fitness is:", self.obj_val)
 
         if self.save:
             self.times += self.lower.total_time
             self.times = np.array(self.times)
             self.times = list(self.times - self.times[0])
-
-        return hist

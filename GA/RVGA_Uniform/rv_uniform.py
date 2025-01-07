@@ -18,6 +18,7 @@ class RVGA_Uniform:
         self.device = device
         self.instance = instance
 
+        # network data
         self.n_paths = self.instance.n_paths
 
         self.pop_size = pop_size
@@ -25,6 +26,7 @@ class RVGA_Uniform:
         self.n_parents = self.n_children * 2
         self.mat_size = self.pop_size + self.n_children
 
+        # calculate individuals maximum value
         self.M = (self.instance.travel_time[:, -1] * (
                 1 + self.instance.alpha * (self.instance.n_users / self.instance.q_od) ** self.instance.beta)).max()
 
@@ -33,6 +35,7 @@ class RVGA_Uniform:
         else:
             self.mutation_range = mutation_range
 
+        # initialize the Lower Level
         self.lower = LowerTorch(self.instance, lower_eps, mat_size=self.mat_size, device=device, M=self.M,
                                 reuse_p=reuse_p, save=save)
 
@@ -62,6 +65,7 @@ class RVGA_Uniform:
         return selected
 
     def crossover(self, parents):
+        # intermediate recombination crossover
         weights = torch.rand(size=(self.n_children, self.n_paths), device=self.device)
         children = weights * parents[:self.n_children] + (1 - weights) * parents[self.n_children:]
         return children

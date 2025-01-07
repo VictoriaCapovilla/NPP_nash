@@ -17,6 +17,7 @@ class RVGA_Gaussian:
         self.device = device
         self.instance = instance
 
+        # network data
         self.n_paths = self.instance.n_paths
 
         self.pop_size = pop_size
@@ -24,10 +25,13 @@ class RVGA_Gaussian:
         self.n_parents = self.n_children * 2
         self.mat_size = self.pop_size + self.n_children
 
+        # calculate individuals maximum value
         self.M = (self.instance.travel_time[:, -1] * (
                 1 + self.instance.alpha * (self.instance.n_users / self.instance.q_od) ** self.instance.beta)).max()
 
-        self.lower = LowerTorch(self.instance, lower_eps, mat_size=self.mat_size, device=device, M=self.M, reuse_p=reuse_p, save=save)
+        # initialize the Lower Level
+        self.lower = LowerTorch(self.instance, lower_eps, mat_size=self.mat_size, device=device, M=self.M,
+                                reuse_p=reuse_p, save=save)
 
         # initialization
         self.population = torch.rand(size=(self.mat_size, self.n_paths), device=self.device) * self.M
@@ -55,13 +59,13 @@ class RVGA_Gaussian:
         return selected
 
     def crossover(self, parents):
+        # intermediate recombination crossover
         weights = torch.rand(size=(self.n_children, self.n_paths), device=self.device)
         children = weights * parents[:self.n_children] + (1 - weights) * parents[self.n_children:]
         return children
 
     def mutation(self, pop):
         std, mean = torch.std_mean(pop, dim=1)
-
         # create gaussian noise tensor
         noise = torch.repeat_interleave((torch.normal(mean, std)).unsqueeze(0), repeats=self.instance.n_paths, dim=0).T
         mutation = pop + noise
