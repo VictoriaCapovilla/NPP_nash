@@ -21,7 +21,7 @@ class PSO:
                 1 + self.instance.alpha * (self.instance.n_users / self.instance.q_od) ** self.instance.beta)).max()
 
         # initialize the Lower Level
-        self.lower = LowerLevel(self.instance, lower_eps, M=self.M, save=save)
+        self.lower = LowerLevel(self.instance, lower_eps, M=self.M)
 
         # parameters
         self.c_soc = c_soc
@@ -29,9 +29,9 @@ class PSO:
         self.w = w
 
         if self.save:
+            self.data_individuals = []
+            self.data_fit = []
             self.times = []
-
-        self.obj_val = 0
 
     def update_position(self, position, velocity):
         new_position = position + velocity
@@ -70,28 +70,36 @@ class PSO:
         if self.save:
             self.times.append(time.time())
         if max_velocity is None:
-            max_velocity=[[0.001,self.M/3]]
+            max_velocity = [[0.001, self.M / 3]]
         # expand the velocity bounds to each dimension
         max_velocities = max_velocity * self.n_paths
         positions = [np.array([np.random.random() * self.M for _ in range(0, self.n_paths)])
                      for i in range(0, swarm_size)]
+        ind = [(x, self.fitness_evaluation(x)) for x in positions]
         velocities = [np.array([np.random.choice([-1, 1]) * np.random.uniform(v[0], v[1])
                                 for v in max_velocities]) for i in range(0, swarm_size)]
         local_best = positions
-        global_best = max(positions, key=self.fitness_evaluation)
+        local = ind
+        global_best, global_fit = max(ind, key=lambda t: t[1])
+        if self.save:
+            self.data_individuals.append(global_best)
+            self.data_fit.append(float(global_fit))
         # updating:
         for i in range(0, n_iter):
             velocities = [self.update_velocity(p, v, global_best, lb, max_velocities)
                           for p, v, lb in zip(positions, velocities, local_best)]
             positions = [self.update_position(p, v) for p, v in zip(positions, velocities)]
-            local_best = [max([p, lb], key=self.fitness_evaluation) for p, lb in zip(positions, local_best)]
-            global_best = max([max(positions, key=self.fitness_evaluation), global_best], key=self.fitness_evaluation)
-        self.obj_val = np.abs(self.fitness_evaluation(global_best))
+            ind = [(x, self.fitness_evaluation(x)) for x in positions]
+            local = [max([p, lb], key=lambda t: t[1]) for p, lb in zip(ind, local)]
+            global_best, global_fit = max([max(ind, key=lambda t: t[1]), (global_best, global_fit)], key=lambda t: t[1])
+            if self.save:
+                self.data_individuals.append(global_best)
+                self.data_fit.append(float(global_fit))
+                self.times.append(time.time())
 
         print("PSO best solution:", global_best)
-        print("Whose fitness is:", self.obj_val)
+        print("Whose fitness is:", global_fit)
 
         if self.save:
-            self.times += self.lower.total_time
             self.times = np.array(self.times)
             self.times = list(self.times - self.times[0])

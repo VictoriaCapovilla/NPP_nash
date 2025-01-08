@@ -24,10 +24,12 @@ class CMAES:
                 1 + self.instance.alpha * (self.instance.n_users / self.instance.q_od) ** self.instance.beta)).max()
 
         # initialize the Lower Level
-        self.lower = LowerLevel(self.instance, lower_eps, M=self.M, save=save)
+        self.lower = LowerLevel(self.instance, lower_eps, M=self.M)
 
         if self.save:
             self.times = []
+            self.data_individuals = []
+            self.data_fit = []
 
     def fitness_evaluation(self, individual):
         # adapting the individual to Lower Level requirements
@@ -48,7 +50,11 @@ class CMAES:
                 value = self.fitness_evaluation(x)  # compute the fitness
                 solutions.append((x, value))  # generate a vector of pairs (solution, fitness value)
             optimizer.tell(solutions)  # we tell CMA-ES what are the solutions and the corresponding fitness
+            ind, fit = min(solutions, key = lambda t: t[1])
+            if self.save:
+                self.data_individuals.append(ind)
+                self.data_fit.append(float(np.abs(fit)))
+                self.times.append(time.time())
         if self.save:
-            self.times += self.lower.total_time
             self.times = np.array(self.times)
             self.times = list(self.times - self.times[0])

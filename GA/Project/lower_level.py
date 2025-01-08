@@ -7,10 +7,9 @@ from Instance.instance import Instance
 
 class LowerLevel:
 
-    def __init__(self, instance: Instance, eps, M, save):
+    def __init__(self, instance: Instance, eps, M):
 
         # set require grad False
-        self.save = save
         self.travel_time = instance.travel_time
 
         self.n_od = instance.n_od
@@ -38,18 +37,7 @@ class LowerLevel:
 
         self.p_old = None
 
-        if self.save:
-            self.data_individuals = []
-            self.data_fit = []
-            self.n_iter = []
-            self.data_time = []
-
-            self.total_time = []
-
     def compute_probs(self, T):
-        if self.save:
-            self.data_individuals.append(T[0])
-
         self.costs[:, : -1] = T
 
         # initial probabilities
@@ -88,24 +76,13 @@ class LowerLevel:
                         1 + self.alpha * (prod[:, -1] / self.q[:, -1]) ** self.beta)
 
             iter += 1
-        if self.save:
-            self.n_iter.append(iter)
         return p_old
 
     def compute_fitness(self, probs):
         fitness = (self.costs[:, :-1] * probs[:, :-1] * self.n_users[:, :-1]).sum()
-        if self.save:
-            self.data_fit.append(float(np.abs(fitness)))
         return fitness
 
     def eval(self, T):
-        if self.save:
-            t = time.time()
-
         probs = self.compute_probs(T)
         fit = self.compute_fitness(probs)
-
-        if self.save:
-            self.data_time.append(time.time() - t)
-            self.total_time.append(time.time())
         return fit
