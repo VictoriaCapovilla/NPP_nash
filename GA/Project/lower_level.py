@@ -76,6 +76,7 @@ class LowerLevel:
                         1 + self.alpha * (prod[:, -1] / self.q[:, -1]) ** self.beta)
 
             iter += 1
+        print(p_new)
         return p_old
 
     def compute_fitness(self, probs):

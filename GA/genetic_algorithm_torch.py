@@ -9,7 +9,7 @@ from GA.lower_level_torch import LowerTorch
 
 class GeneticAlgorithmTorch:
 
-    def __init__(self, instance, pop_size, offspring_proportion=0.5, lower_eps=10**(-12),
+    def __init__(self, instance, pop_size, offspring_proportion=0.5, mutation_rate=0.02, lower_eps=10**(-12),
                  device=None, reuse_p=False, save=False):
 
         self.save = save
@@ -19,6 +19,7 @@ class GeneticAlgorithmTorch:
         self.n_paths = self.instance.n_paths
 
         self.pop_size = pop_size
+        self.mutation_rate = mutation_rate
         self.n_children = int(pop_size * offspring_proportion)
         self.mat_size = self.pop_size + self.n_children
         self.mask = torch.zeros(self.n_paths * self.n_children, device=self.device, dtype=torch.bool)
@@ -53,7 +54,7 @@ class GeneticAlgorithmTorch:
 
         self.obj_val = 0
 
-    def run(self, iterations):
+    def run(self, iterations, verbose=False):
         if self.save:
             self.times.append(time.time())
 
@@ -71,7 +72,7 @@ class GeneticAlgorithmTorch:
 
             # mutation:
             p = torch.rand(size=(self.n_children, self.n_paths), device=self.device)
-            idxs = torch.argwhere(p < 0.02)
+            idxs = torch.argwhere(p < self.mutation_rate)
             idxs[:, 0] += self.pop_size
 
             self.population[idxs[:, 0], idxs[:, 1]] = torch.rand(size=(idxs.shape[0],), device=self.device) * self.M
@@ -83,6 +84,11 @@ class GeneticAlgorithmTorch:
             fitness_order = np.argsort(-self.vals.to('cpu'))
             self.population = self.population[fitness_order]
             self.vals = self.vals[fitness_order]
+
+            if verbose:
+                print(_, self.vals[0].item())
+                print(self.vals)
+                # print(self.population)
 
             if self.save:
                 self.data_individuals.append(self.population[0].detach().cpu().numpy())

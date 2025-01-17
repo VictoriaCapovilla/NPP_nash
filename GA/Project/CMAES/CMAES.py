@@ -31,6 +31,9 @@ class CMAES:
             self.data_individuals = []
             self.data_fit = []
 
+
+        self.temp = None
+
     def fitness_evaluation(self, individual):
         # adapting the individual to Lower Level requirements
         individual = np.transpose(np.reshape(np.repeat(np.array(individual), repeats=self.n_od),
@@ -38,7 +41,7 @@ class CMAES:
         # return a negative value of the fitness since CMA-ES works with minimization
         return - self.lower.eval(individual)
 
-    def run_CMA(self, n_gen, pop_size):
+    def run_CMA(self, n_gen, pop_size, verbose=False):
         if self.save:
             self.times.append(time.time())
         optimizer = CMA(mean=(self.M / 2 * np.ones(self.n_paths)), sigma=(self.M * 0.3),
@@ -51,10 +54,14 @@ class CMAES:
                 solutions.append((x, value))  # generate a vector of pairs (solution, fitness value)
             optimizer.tell(solutions)  # we tell CMA-ES what are the solutions and the corresponding fitness
             ind, fit = min(solutions, key = lambda t: t[1])
+            if verbose:
+                print(generation, fit)
             if self.save:
                 self.data_individuals.append(ind)
                 self.data_fit.append(float(np.abs(fit)))
                 self.times.append(time.time())
+
+        self.temp = solutions
         if self.save:
             self.times = np.array(self.times)
             self.times = list(self.times - self.times[0])

@@ -109,6 +109,7 @@ class LowerTorch:
                         1 + self.alpha * (prod[:, :, -1] / self.q[:, :, -1]) ** self.beta)
 
             iter += 1
+        print(p_new.to('cpu').numpy())
         if self.save:
             self.n_iter.append(iter)
             self.data_payoffs.append(self.m_new[0].detach().cpu().numpy())
