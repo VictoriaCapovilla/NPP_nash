@@ -70,13 +70,11 @@ class LowerLevel:
             # updated payoff
             prod = self.n_users * p_new
             self.m_new = (self.K - self.travel_time * (
-                    1 + self.alpha * (np.reshape(np.repeat(prod.sum(axis=0), repeats=self.n_od),
-                                                 (self.n_od, self.total_paths)) / self.q) ** self.beta) - self.costs)
+                    1 + self.alpha * (np.repeat(prod.sum(axis=0), repeats=self.n_od).reshape( -1, self.n_od).T / self.q) ** self.beta) - self.costs)
             self.m_new[:, -1] = self.K - self.travel_time[:, -1] * (
                         1 + self.alpha * (prod[:, -1] / self.q[:, -1]) ** self.beta)
 
             iter += 1
-        print(p_new)
         return p_old
 
     def compute_fitness(self, probs):

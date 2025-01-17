@@ -87,8 +87,6 @@ class GeneticAlgorithmTorch:
 
             if verbose:
                 print(_, self.vals[0].item())
-                print(self.vals)
-                # print(self.population)
 
             if self.save:
                 self.data_individuals.append(self.population[0].detach().cpu().numpy())

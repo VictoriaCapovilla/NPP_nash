@@ -102,6 +102,7 @@ class LowerTorch:
 
             # updated payoff
             prod = self.n_users * p_new
+
             self.m_new = self.K - self.travel_time * (
                           1 + self.alpha * (torch.repeat_interleave(prod.sum(dim=1).unsqueeze(1), repeats=self.n_od,
                                                                     dim=1) / self.q) ** self.beta) - self.costs
@@ -109,11 +110,10 @@ class LowerTorch:
                         1 + self.alpha * (prod[:, :, -1] / self.q[:, :, -1]) ** self.beta)
 
             iter += 1
-        print(p_new.to('cpu').numpy())
+
         if self.save:
             self.n_iter.append(iter)
             self.data_payoffs.append(self.m_new[0].detach().cpu().numpy())
-        # print(iter)
 
         if self.reuse_p:
             self.p_old = p_new

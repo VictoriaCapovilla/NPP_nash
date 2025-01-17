@@ -32,8 +32,6 @@ class CMAES:
             self.data_fit = []
 
 
-        self.temp = None
-
     def fitness_evaluation(self, individual):
         # adapting the individual to Lower Level requirements
         individual = np.transpose(np.reshape(np.repeat(np.array(individual), repeats=self.n_od),
@@ -61,7 +59,6 @@ class CMAES:
                 self.data_fit.append(float(np.abs(fit)))
                 self.times.append(time.time())
 
-        self.temp = solutions
         if self.save:
             self.times = np.array(self.times)
             self.times = list(self.times - self.times[0])
