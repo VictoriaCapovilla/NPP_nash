@@ -1,7 +1,7 @@
-import random
 import time
 
 import numpy as np
+import pandas as pd
 
 import torch
 
@@ -65,6 +65,7 @@ class RVGA_Gaussian:
         return children
 
     def mutation(self, pop):
+        # calculate std and mean of each individual
         std, mean = torch.std_mean(pop, dim=1)
         # create gaussian noise tensor
         noise = torch.repeat_interleave((torch.normal(mean, std)).unsqueeze(0), repeats=self.instance.n_paths, dim=0).T
@@ -74,10 +75,10 @@ class RVGA_Gaussian:
         mutation = torch.where(mutation > self.M, self.M, mutation)
         return mutation
 
-    def run_gm(self, generations):
+    def run_gm(self, n_gen, run_number=None, gaussian_df=None):
         if self.save:
             self.times.append(time.time())
-        for _ in range(generations):
+        for _ in range(n_gen):
             # TOURNAMENT SELECTION
             selected = torch.stack([self.tournament_selection(self.population) for _ in range(0, self.n_parents)])
 
@@ -97,9 +98,45 @@ class RVGA_Gaussian:
                 self.data_individuals.append(self.population[0].detach().cpu().numpy())
                 self.data_fit.append(float(self.vals[0]))
 
+        print("Best fitness is:", self.vals[0])
+
         if self.save:
             self.times += self.lower.total_time
             self.times = np.array(self.times)
-            self.times = list(self.times - self.times[0])
+            self.times = list(abs(self.times - self.times[0]))
+            if gaussian_df is not False:
+                gaussian_df = self.update_csv(n_gen, run_number, gaussian_df)
+                return gaussian_df
 
-        return self.vals[0]
+    def update_csv(self, n_generations, run_number, gaussian_df):
+        # creating dataframe
+        data = {
+            'time': self.times[-1],
+            'upper_iter': n_generations,
+            'fitness': float(self.data_fit[-1]),
+            'best_individual': [self.data_individuals[-1]],
+            'upper_time': [self.times],
+            'lower_time': [self.lower.data_time],
+            'lower_iter': [self.lower.n_iter],
+            'fit_update': [self.data_fit],
+            'ind_update': [self.data_individuals],
+            'n_paths': self.n_paths,
+            'n_od': self.instance.n_od,
+            'n_users': [self.instance.n_users],
+            'pop_size': self.pop_size,
+            'alpha': self.instance.alpha,
+            'beta': self.instance.beta,
+            'M': self.M,
+            'K': float(self.lower.K),
+            'eps': self.lower.eps,
+            'run': run_number
+        }
+
+        df = pd.DataFrame(data=data)
+
+        if gaussian_df is None:
+            gaussian_df = df
+        else:
+            gaussian_df = pd.concat([gaussian_df, df])
+
+        return gaussian_df

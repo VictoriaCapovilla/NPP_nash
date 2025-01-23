@@ -1,6 +1,7 @@
 import time
 
 import numpy as np
+import pandas as pd
 
 from GA.Project.lower_level import LowerLevel
 
@@ -52,7 +53,7 @@ class PSO:
         cognitive_component = self.c_cog * r2 * (local_best - position)
         inertia = self.w * velocity
         new_velocity = inertia + social_component + cognitive_component
-        # check the particle is not going outside the maximum velocity boundaries:
+        # check the particle is not going outside the velocity boundaries:
         for i, v in enumerate(max_velocities):
             if np.abs(new_velocity[i]) < v[0]:
                 new_velocity[i] = np.sign(new_velocity[i]) * v[0]
@@ -66,13 +67,12 @@ class PSO:
                                              (self.n_od, self.n_paths)))
         return self.lower.eval(individual)
 
-    def run_PSO(self, n_iter, swarm_size, max_velocity=None):
+    def run_PSO(self, n_gen, swarm_size, max_velocity=None, run_number=None, PSOdf=None):
         if self.save:
             self.times.append(time.time())
         if max_velocity is None:
             max_velocity = [[0.001, self.M / 3]]
-        # expand the velocity bounds to each dimension
-        max_velocities = max_velocity * self.n_paths
+        max_velocities = max_velocity * self.n_paths    # expand the velocity bounds to each dimension
         positions = [np.array([np.random.random() * self.M for _ in range(0, self.n_paths)])
                      for i in range(0, swarm_size)]
         ind = [(x, self.fitness_evaluation(x)) for x in positions]
@@ -85,7 +85,7 @@ class PSO:
             self.data_individuals.append(global_best)
             self.data_fit.append(float(global_fit))
         # updating:
-        for i in range(0, n_iter):
+        for i in range(0, n_gen):
             velocities = [self.update_velocity(p, v, global_best, lb, max_velocities)
                           for p, v, lb in zip(positions, velocities, local_best)]
             positions = [self.update_position(p, v) for p, v in zip(positions, velocities)]
@@ -103,3 +103,42 @@ class PSO:
         if self.save:
             self.times = np.array(self.times)
             self.times = list(self.times - self.times[0])
+            if PSOdf is not False:
+                PSOdf = self.update_csv(n_gen, swarm_size, max_velocity, run_number, PSOdf)
+                return PSOdf
+
+
+    def update_csv(self, n_generations, swarm_size, max_velocity, run_number, PSOdf):
+        # creating dataframe
+        data = {
+            'time': self.times[-1],
+            'upper_iter': n_generations,
+            'fitness': float(self.data_fit[-1]),
+            'best_individual': [self.data_individuals[-1]],
+            'upper_time': [self.times],
+            'fit_update': [self.data_fit],
+            'ind_update': [self.data_individuals],
+            'n_paths': self.n_paths,
+            'n_od': self.instance.n_od,
+            'n_users': [self.instance.n_users],
+            'swarm_size': swarm_size,
+            'max_velocity': max_velocity,
+            'c_soc': self.c_soc,
+            'c_cog': self.c_cog,
+            'w': self.w,
+            'alpha': self.instance.alpha,
+            'beta': self.instance.beta,
+            'M': self.M,
+            'K': float(self.lower.K),
+            'eps': self.lower.eps,
+            'run': run_number
+        }
+
+        df = pd.DataFrame(data=data)
+
+        if PSOdf is None:
+            PSOdf = df
+        else:
+            PSOdf = pd.concat([PSOdf, df])
+
+        return PSOdf

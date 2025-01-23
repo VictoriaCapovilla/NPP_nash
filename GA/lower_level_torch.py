@@ -10,21 +10,20 @@ class LowerTorch:
 
     def __init__(self, instance: Instance, eps, mat_size, device, M, save, reuse_p=False):
 
-        # set require grad False
         self.save = save
         self.reuse_p = reuse_p
         self.device = device
 
+        # network data
+        self.n_od = instance.n_od
+        self.total_paths = instance.n_paths + 1
+        self.n_users = torch.tensor(np.array([instance.n_users for _ in range(self.total_paths)]), device=self.device).T
+
         self.mat_size = mat_size
         self.travel_time = torch.tensor(instance.travel_time).to(self.device)
+        self.costs = torch.zeros((instance.n_od, self.total_paths)).to(self.device)
 
-        self.n_od = instance.n_od
-
-        self.alpha = instance.alpha
-        self.beta = instance.beta
-        self.gamma = instance.gamma
-
-        self.total_paths = instance.n_paths + 1
+        # capacity constraints
         self.q = torch.zeros_like(self.travel_time).to(self.device)
         q_p = torch.repeat_interleave(torch.tensor(instance.q_p, device=self.device).unsqueeze(0),
                                       repeats=self.n_od, dim=0)
@@ -35,17 +34,19 @@ class LowerTorch:
         self.travel_time = torch.repeat_interleave(self.travel_time.unsqueeze(0), repeats=mat_size, dim=0)
         self.q = torch.repeat_interleave(self.q.unsqueeze(0), repeats=mat_size, dim=0)
 
-        self.n_users = torch.tensor(np.array([instance.n_users for _ in range(self.total_paths)]), device=self.device).T
         self.n_users = torch.repeat_interleave(self.n_users.unsqueeze(0), repeats=mat_size, dim=0)
 
-        self.costs = torch.zeros((instance.n_od, self.total_paths)).to(self.device)
         self.costs = torch.repeat_interleave(self.costs.unsqueeze(0), repeats=mat_size, dim=0)
 
+        # parameters
+        self.alpha = instance.alpha
+        self.beta = instance.beta
         self.eps = eps
 
         self.K = (self.travel_time[0, :, :] * (1 + self.alpha * (self.n_users[0, :, 0].sum() / self.q[0, :, :])
                                                ** self.beta)).max() + M
 
+        # payoff matrix
         self.m_new = torch.zeros_like(self.q)
         self.m_old = torch.zeros_like(self.q)
 
@@ -100,9 +101,10 @@ class LowerTorch:
             # updated probabilities
             p_new = p_old * self.m_old / m_average
 
-            # updated payoff
+            # users flow on each path
             prod = self.n_users * p_new
 
+            # updated payoff
             self.m_new = self.K - self.travel_time * (
                           1 + self.alpha * (torch.repeat_interleave(prod.sum(dim=1).unsqueeze(1), repeats=self.n_od,
                                                                     dim=1) / self.q) ** self.beta) - self.costs

@@ -1,6 +1,7 @@
 import time
 
 import numpy as np
+import pandas as pd
 
 import torch
 
@@ -16,12 +17,15 @@ class GeneticAlgorithmTorch:
         self.device = device
         self.instance = instance
 
+        # network data
         self.n_paths = self.instance.n_paths
 
         self.pop_size = pop_size
         self.mutation_rate = mutation_rate
         self.n_children = int(pop_size * offspring_proportion)
         self.mat_size = self.pop_size + self.n_children
+
+        # booleans tensor (description below)
         self.mask = torch.zeros(self.n_paths * self.n_children, device=self.device, dtype=torch.bool)
 
         # calculate individuals maximum value
@@ -40,6 +44,7 @@ class GeneticAlgorithmTorch:
         self.parents = self.parents_idxs[torch.randperm(self.parents_idxs.shape[0],
                                                         device=self.device)[:self.n_children]]
 
+        # fitness evaluation
         self.vals = torch.zeros(self.mat_size, device=self.device)
         self.vals = self.lower.eval(self.population)
 
@@ -54,23 +59,25 @@ class GeneticAlgorithmTorch:
 
         self.obj_val = 0
 
-    def run(self, iterations, verbose=False):
+    def run(self, n_gen, run_number=None, vanilla_df=None, verbose=False):
         if self.save:
             self.times.append(time.time())
 
-        for _ in range(iterations):
-            # selection
+        for _ in range(n_gen):
+            # SELECT PARENTS
             self.parents = self.parents_idxs[torch.randperm(self.parents_idxs.shape[0],
                                                             device=self.device)[:self.n_children]]
-
+            # booleans tensor
             self.mask[torch.randperm(self.mask.shape[0], device=self.device)[:self.mask.shape[0]//2]] = True
+            # mask will be assigned to parents[:,0] and the True position value of parents[:,0] will be crossed over
+            # with the complementary position value of parents[:,1] (corresponding to False)
 
-            # crossover
+            # CROSSOVER
             self.population[self.pop_size:] = \
                 (self.population[self.parents[:self.n_children][:, 0]] * self.mask.view(self.n_children, -1)
                  + self.population[self.parents[:self.n_children][:, 1]] * (~self.mask.view(self.n_children, -1)))
 
-            # mutation:
+            # MUTATION:
             p = torch.rand(size=(self.n_children, self.n_paths), device=self.device)
             idxs = torch.argwhere(p < self.mutation_rate)
             idxs[:, 0] += self.pop_size
@@ -92,9 +99,45 @@ class GeneticAlgorithmTorch:
                 self.data_individuals.append(self.population[0].detach().cpu().numpy())
                 self.data_fit.append(float(self.vals[0]))
 
+        print("Best fitness is:", self.vals[0])
+
         if self.save:
             self.times += self.lower.total_time
             self.times = np.array(self.times)
             self.times = list(self.times - self.times[0])
+            if vanilla_df is not False:
+                vanilla_df = self.update_csv(n_gen, run_number, vanilla_df)
+                return vanilla_df
 
-        return self.vals[0]
+    def update_csv(self, n_generations, run_number, vanilla_df):
+        # creating dataframe
+        data = {
+            'time': self.times[-1],
+            'upper_iter': n_generations,
+            'fitness': float(self.data_fit[-1]),
+            'best_individual': [self.data_individuals[-1]],
+            'upper_time': [self.times],
+            'lower_time': [self.lower.data_time],
+            'lower_iter': [self.lower.n_iter],
+            'fit_update': [self.data_fit],
+            'ind_update': [self.data_individuals],
+            'n_paths': self.n_paths,
+            'n_od': self.instance.n_od,
+            'n_users': [self.instance.n_users],
+            'pop_size': self.pop_size,
+            'alpha': self.instance.alpha,
+            'beta': self.instance.beta,
+            'M': self.M,
+            'K': float(self.lower.K),
+            'eps': self.lower.eps,
+            'run': run_number
+        }
+
+        df = pd.DataFrame(data=data)
+
+        if vanilla_df is None:
+            vanilla_df = df
+        else:
+            vanilla_df = pd.concat([vanilla_df, df])
+
+        return vanilla_df

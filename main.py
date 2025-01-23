@@ -1,122 +1,84 @@
-import ast
-import time
-
 import numpy as np
 import random
 
 import torch
 
-import pandas as pd
-
-import matplotlib.pyplot as plt
+import time
 
 from GA.genetic_algorithm_torch import GeneticAlgorithmTorch
-from GA.RVGA_Uniform.rv_uniform import RVGA_Uniform
-from GA.RVGA_Gaussian.rv_gaussian import RVGA_Gaussian
+from GA.Project.RVGA_Uniform.rv_uniform import RVGA_Uniform
+from GA.Project.RVGA_Gaussian.rv_gaussian import RVGA_Gaussian
+from GA.Project.CMAES.CMAES import CMAES
+from GA.Project.PSO.PSO import PSO
+from GA.Project.PSO.FST_PSO import FST_PSO
 from Instance.instance import Instance
-
-
-# Convert the cleaned string to an array
-def to_matrix(a):
-    cleaned_string = (a.replace('\r\n', ' ').replace('\n', ' ').replace('array(', '').replace('np.float64(', '')
-                      .strip().replace('   ', ' ').replace('  ', ' ').replace('[ ', '[').replace(' ]', ']')
-                      .replace('(', '').replace(')', '').replace(' ', ',').replace(',,', ',').replace(',,', ','))
-
-    return np.array(ast.literal_eval(cleaned_string))
-
 
 seed = 0
 np.random.seed(seed)
 random.seed(seed)
 torch.manual_seed(seed)
 
-PATHS = 5
-N_OD = 5
-POP_SIZE = int(10 + 2*np.sqrt(PATHS))
-LOWER_EPS = 10**(-4)
+PATHS = 20
+N_OD = 20
+POP_SIZE = 64
 GENERATIONS = 400
+LOWER_EPS = 10 ** (-4)
 OFFSPRING_RATE = 0.5
+MUTATION_RATE = 0.02
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 instance = Instance(n_paths=PATHS, n_od=N_OD)
 
-N_RUN = 30
+N_RUN = 10
+SAVE = False
 
-SAVE = True
-total_df = None
-n = 0
+vanilla_df = None
+uniform_df = None
+gaussian_df = None
+CMAESdf = None
+PSOdf = None
+FSTPSOdf = None
 
-for k in range(N_RUN):
+for run in range(N_RUN):
     t = time.time()
 
-    # vanilla genetic algorithm
-    # genetic_algorithm = GeneticAlgorithmTorch(instance, POP_SIZE, lower_eps=LOWER_EPS,
-    #                                           offspring_proportion=OFFSPRING_RATE, device=device,
-    #                                           reuse_p=None, save=True)
-    # best_fit = genetic_algorithm.run(GENERATIONS)
+    # # vanilla genetic algorithm
+    # vanilla = GeneticAlgorithmTorch(instance, POP_SIZE, lower_eps=LOWER_EPS,
+    #                                           offspring_proportion=OFFSPRING_RATE, mutation_rate=MUTATION_RATE,
+    #                                           device=device, reuse_p=None, save=SAVE)
+    # vanilla_df = vanilla.run(GENERATIONS, run_number=run, vanilla_df=vanilla_df)
 
     # real valued genetic algorithm with UNIFORM MUTATION
-    # genetic_algorithm = RVGA_Uniform(instance, POP_SIZE, lower_eps=LOWER_EPS,
-    #                                  offspring_proportion=OFFSPRING_RATE, device=device, reuse_p=None, save=SAVE)
-    # best_fit = genetic_algorithm.run_um(GENERATIONS)
-
-    # real valued genetic algorithm with GAUSSIAN MUTATION
-    genetic_algorithm = RVGA_Gaussian(instance, POP_SIZE, lower_eps=LOWER_EPS,
+    rvga_uniform = RVGA_Uniform(instance, POP_SIZE, lower_eps=LOWER_EPS,
                                      offspring_proportion=OFFSPRING_RATE, device=device, reuse_p=None, save=SAVE)
-    best_fit = genetic_algorithm.run_gm(GENERATIONS)
+    uniform_df = rvga_uniform.run_um(GENERATIONS, run_number=run, uniform_df=uniform_df)
 
-    if SAVE:
-        # creating dataframe
-        data = {
-            'time': time.time() - t,
-            # 'mutation_range': [genetic_algorithm.mutation_range],
-            # 'std': [std],
-            'upper_iter': GENERATIONS,
-            'fitness': float(best_fit),
-            'best_individual': [genetic_algorithm.data_individuals[-1]],
-            'upper_time': [genetic_algorithm.times],
-            'lower_time': [genetic_algorithm.lower.data_time],
-            'lower_iter': [genetic_algorithm.lower.n_iter],
-            'fit_update': [genetic_algorithm.data_fit],
-            'ind_update': [genetic_algorithm.data_individuals],
-            # 'probs': [genetic_algorithm.lower.data_probs],
-            # 'payoffs': [genetic_algorithm.lower.data_payoffs],
-            'n_paths': genetic_algorithm.n_paths,
-            'n_od': genetic_algorithm.instance.n_od,
-            'n_users': [genetic_algorithm.instance.n_users],
-            'pop_size': genetic_algorithm.pop_size,
-            'alpha': genetic_algorithm.instance.alpha,
-            'beta': genetic_algorithm.instance.beta,
-            'M': genetic_algorithm.M,
-            'K': float(genetic_algorithm.lower.K),
-            'eps': genetic_algorithm.lower.eps,
-            'run': n
-        }
-        df = pd.DataFrame(data=data)
+    # # real valued genetic algorithm with GAUSSIAN MUTATION
+    # rvga_gaussian = RVGA_Gaussian(instance, POP_SIZE, lower_eps=LOWER_EPS,
+    #                                  offspring_proportion=OFFSPRING_RATE, device=device, reuse_p=None, save=SAVE)
+    # gaussian_df = rvga_gaussian.run_gm(GENERATIONS, run_number=run, gaussian_df=gaussian_df)
 
-        if total_df is None:
-            total_df = df
-        else:
-            total_df = pd.concat([total_df, df])
+    # # CMA-ES
+    # CMA_ES = CMAES(instance, lower_eps=LOWER_EPS, save=SAVE)
+    #
+    # CMAESdf = CMA_ES.run_CMA(GENERATIONS, pop_size=POP_SIZE, run_number=run, CMAESdf=CMAESdf)
 
+    # # classic PSO
+    # classic_PSO = PSO(instance, lower_eps=LOWER_EPS, save=SAVE)
+    #
+    # PSOdf = classic_PSO.run_PSO(GENERATIONS, swarm_size=POP_SIZE, run_number=run, PSOdf=PSOdf)
 
-        total_df.to_csv(r'C:\Users\viki\Desktop\NPP\Results\test', index=False)
+    # # fuzzy self-tuning PSO
+    # FST_PSO = FST_PSO(instance, lower_eps=LOWER_EPS, save=SAVE)
+    #
+    # FSTPSOdf = FST_PSO.run_FST_PSO(GENERATIONS, swarm_size=POP_SIZE, run_number=run, FSTPSOdf=FSTPSOdf)
 
-    print('RV_G run', n + 1, 'of', N_RUN, 'complete', '\ntime:', time.time() - t, '\nfitness:', best_fit)
-    n +=1
+    print('Run', run, 'of', N_RUN, 'complete', '\ntime:', time.time() - t)
 
-df = pd.read_csv(r'C:\Users\viki\Desktop\NPP\Results\test')
-
-print((max(df.fitness) - df.fitness[0])/df.fitness[0] * 100)
-
-for l in range(3):
-    for i in range(10 * l, N_RUN + 10 * l):
-        x = to_matrix(df.total_time[i])[1:]
-        y = to_matrix(df.fit_update[i])
-        plt.plot(x, y, label=str(i))
-    plt.title("Plotting rv_GA")
-    plt.xlabel("time")
-    plt.ylabel("fitness")
-    plt.legend()
-    plt.show()
+# vanilla_df.to_csv('/home/capovilla/Scrivania/NPP_nash/Results/vanilla_test', index=False)
+uniform_df.to_csv('/home/capovilla/Scrivania/NPP_nash/Results/uniform_test', index=False)
+# gaussian_df.to_csv('/home/capovilla/Scrivania/NPP_nash/Results/gaussian_test', index=False)
+# CMAESdf.to_csv('/home/capovilla/Scrivania/NPP_nash/Results/CMAEStest', index=False)
+# PSOdf.to_csv('/home/capovilla/Scrivania/NPP_nash/Results/PSOtest', index=False)
+# FSTPSOdf.to_csv('/home/capovilla/Scrivania/NPP_nash/Results/FSTPSOtest', index=False)
