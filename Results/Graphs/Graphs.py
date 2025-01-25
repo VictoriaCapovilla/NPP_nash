@@ -21,10 +21,10 @@ PSO = pd.read_csv(r'C:\Users\viki\Desktop\NPP\Results\20x20\64_400\PSO')
 FST = pd.read_csv(r'C:\Users\viki\Desktop\NPP\Results\20x20\64_400\FSTPSO')
 uni = pd.read_csv(r'C:\Users\viki\Desktop\NPP\Results\20x20\64_400\rv_uniform')
 gauss = pd.read_csv(r'C:\Users\viki\Desktop\NPP\Results\20x20\64_400\rv_gauss')
-torch = pd.read_csv(r'C:\Users\viki\Desktop\NPP\Results\20x20\64_400\torch')
+vanilla = pd.read_csv(r'C:\Users\viki\Desktop\NPP\Results\20x20\64_400\torch')
 
 # BEST CASE FOR EACH ALG
-for _ in [CMA, PSO, FST, uni, gauss, torch]:
+for _ in [CMA, PSO, FST, uni, gauss, vanilla]:
     a = _.loc[_.fitness == max(_.fitness)].index
     if _ is PSO:
         x = to_matrix(_.upper_time[a[0]])
@@ -40,7 +40,7 @@ plt.legend(['CMA-ES', 'PSO', 'FST-PSO', 'rv_uniform', 'rv_gauss', 'vanilla'])
 plt.show()
 
 # WORST CASE FOR EACH ALG
-for _ in [CMA, PSO, FST, uni, gauss, torch]:
+for _ in [CMA, PSO, FST, uni, gauss, vanilla]:
     a = _.loc[_.fitness == min(_.fitness)].index
     if _ is PSO:
         x = to_matrix(_.upper_time[a[0]])
@@ -56,7 +56,7 @@ plt.legend(['CMA-ES', 'PSO', 'FST-PSO', 'rv_uniform', 'rv_gauss', 'vanilla'])
 plt.show()
 
 # MEANS FOR EACH ALG
-for _ in [CMA, PSO, FST, uni, gauss, torch]:
+for _ in [CMA, PSO, FST, uni, gauss, vanilla]:
     a = len(to_matrix(_.fit_update[0]))
     b = len(_.fitness)
     time = []
@@ -80,7 +80,7 @@ plt.legend(['CMA-ES', 'PSO', 'FST-PSO', 'rv_uniform', 'rv_gauss', 'vanilla'])
 plt.show()
 
 # BOX PLOTS
-plt.boxplot([CMA.fitness, PSO.fitness, FST.fitness, uni.fitness, gauss.fitness, torch.fitness])
+plt.boxplot([CMA.fitness, PSO.fitness, FST.fitness, uni.fitness, gauss.fitness, vanilla.fitness])
 plt.xticks([1, 2, 3, 4, 5, 6], ['CMA-ES', 'PSO', 'FST-PSO', 'rv_uniform', 'rv_gauss', 'vanilla'])
 plt.ylabel('fitness')
 plt.title("20 paths, 20 ODs, pop_size = 64, gen = 400")
@@ -92,9 +92,9 @@ PSO.name = 'PSO'
 FST.name = 'FST-PSO'
 uni.name = 'rv_uniform'
 gauss.name = 'rv_gaussian'
-torch.name = 'vanilla'
+vanilla.name = 'vanilla'
 
-for _ in [CMA, PSO, FST, uni, gauss, torch]:
+for _ in [CMA, PSO, FST, uni, gauss, vanilla]:
     if _ is PSO:
         for i in range(len(_.fitness)):
             x = to_matrix(_.upper_time[i])
