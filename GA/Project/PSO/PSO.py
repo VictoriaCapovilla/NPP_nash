@@ -75,12 +75,12 @@ class PSO:
         max_velocities = max_velocity * self.n_paths    # expand the velocity bounds to each dimension
         positions = [np.array([np.random.random() * self.M for _ in range(0, self.n_paths)])
                      for i in range(0, swarm_size)]
-        ind = [(x, self.fitness_evaluation(x)) for x in positions]
+        ind_fit = [(x, self.fitness_evaluation(x)) for x in positions]
         velocities = [np.array([np.random.choice([-1, 1]) * np.random.uniform(v[0], v[1])
                                 for v in max_velocities]) for i in range(0, swarm_size)]
         local_best = positions
-        local = ind
-        global_best, global_fit = max(ind, key=lambda t: t[1])
+        local_best_ind_fit = ind_fit
+        global_best, global_fit = max(ind_fit, key=lambda t: t[1])
         if self.save:
             self.data_individuals.append(global_best)
             self.data_fit.append(float(global_fit))
@@ -89,9 +89,10 @@ class PSO:
             velocities = [self.update_velocity(p, v, global_best, lb, max_velocities)
                           for p, v, lb in zip(positions, velocities, local_best)]
             positions = [self.update_position(p, v) for p, v in zip(positions, velocities)]
-            ind = [(x, self.fitness_evaluation(x)) for x in positions]
-            local = [max([p, lb], key=lambda t: t[1]) for p, lb in zip(ind, local)]
-            global_best, global_fit = max([max(ind, key=lambda t: t[1]), (global_best, global_fit)], key=lambda t: t[1])
+            ind_fit = [(x, self.fitness_evaluation(x)) for x in positions]
+            local_best_ind_fit = [max([p, lb], key=lambda t: t[1]) for p, lb in zip(ind_fit, local_best_ind_fit)]
+            local_best = [item[0] for item in local_best_ind_fit]
+            global_best, global_fit = max([max(ind_fit, key=lambda t: t[1]), (global_best, global_fit)], key=lambda t: t[1])
             if self.save:
                 self.data_individuals.append(global_best)
                 self.data_fit.append(float(global_fit))
