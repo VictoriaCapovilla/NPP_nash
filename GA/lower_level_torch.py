@@ -8,10 +8,9 @@ from Instance.instance import Instance
 
 class LowerTorch:
 
-    def __init__(self, instance: Instance, eps, mat_size, device, M, save, reuse_p=False):
+    def __init__(self, instance: Instance, eps, mat_size, device, M, save):
 
         self.save = save
-        self.reuse_p = reuse_p
         self.device = device
 
         # network data
@@ -50,11 +49,7 @@ class LowerTorch:
         self.m_new = torch.zeros_like(self.q)
         self.m_old = torch.zeros_like(self.q)
 
-        if self.reuse_p:
-            self.p_old = torch.ones((self.n_od, self.total_paths), device=self.device) / self.total_paths
-            self.p_old = torch.repeat_interleave(self.p_old.unsqueeze(0), repeats=self.mat_size, dim=0)
-        else:
-            self.p_old = None
+        self.p_old = None
 
         if self.save:
             self.n_iter = []
@@ -69,11 +64,8 @@ class LowerTorch:
         self.costs[:, :, : -1] = T
 
         # initial probabilities
-        if not self.reuse_p:
-            p_old = torch.ones((self.n_od, self.total_paths), device=self.device) / self.total_paths
-            p_old = torch.repeat_interleave(p_old.unsqueeze(0), repeats=self.mat_size, dim=0)
-        else:
-            p_old = self.p_old
+        p_old = torch.ones((self.n_od, self.total_paths), device=self.device) / self.total_paths
+        p_old = torch.repeat_interleave(p_old.unsqueeze(0), repeats=self.mat_size, dim=0)
 
         p_new = p_old
 
@@ -117,8 +109,6 @@ class LowerTorch:
             self.n_iter.append(iter)
             self.data_payoffs.append(self.m_new[0].detach().cpu().numpy())
 
-        if self.reuse_p:
-            self.p_old = p_new
         return p_old
 
     def compute_fitness(self, probs):

@@ -11,7 +11,7 @@ from GA.lower_level_torch import LowerTorch
 class RVGA_Gaussian:
 
     def __init__(self, instance, pop_size, offspring_proportion=0.5, lower_eps=10**(-12),
-                 device=None, reuse_p=False, save=False):
+                 device=None, save=False):
 
         self.save = save
         self.device = device
@@ -30,8 +30,7 @@ class RVGA_Gaussian:
                 1 + self.instance.alpha * (self.instance.n_users / self.instance.q_od) ** self.instance.beta)).max()
 
         # initialize the Lower Level
-        self.lower = LowerTorch(self.instance, lower_eps, mat_size=self.mat_size, device=device, M=self.M,
-                                reuse_p=reuse_p, save=save)
+        self.lower = LowerTorch(self.instance, lower_eps, mat_size=self.mat_size, device=device, M=self.M, save=save)
 
         # initialization
         self.population = torch.rand(size=(self.mat_size, self.n_paths), device=self.device) * self.M

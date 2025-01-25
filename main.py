@@ -45,18 +45,18 @@ for run in range(N_RUN):
 
     # # vanilla genetic algorithm
     # vanilla = GeneticAlgorithmTorch(instance, POP_SIZE, lower_eps=LOWER_EPS,
-    #                                           offspring_proportion=OFFSPRING_RATE, mutation_rate=MUTATION_RATE,
-    #                                           device=device, reuse_p=None, save=SAVE)
+    #                                 offspring_proportion=OFFSPRING_RATE, mutation_rate=MUTATION_RATE,
+    #                                 device=device, save=SAVE)
     # vanilla_df = vanilla.run(GENERATIONS, run_number=run, vanilla_df=vanilla_df)
 
     # real valued genetic algorithm with UNIFORM MUTATION
-    rvga_uniform = RVGA_Uniform(instance, POP_SIZE, lower_eps=LOWER_EPS,
-                                     offspring_proportion=OFFSPRING_RATE, device=device, reuse_p=None, save=SAVE)
+    rvga_uniform = RVGA_Uniform(instance, POP_SIZE, lower_eps=LOWER_EPS, offspring_proportion=OFFSPRING_RATE,
+                                device=device, save=SAVE)
     uniform_df = rvga_uniform.run_um(GENERATIONS, run_number=run, uniform_df=uniform_df)
 
     # # real valued genetic algorithm with GAUSSIAN MUTATION
-    # rvga_gaussian = RVGA_Gaussian(instance, POP_SIZE, lower_eps=LOWER_EPS,
-    #                                  offspring_proportion=OFFSPRING_RATE, device=device, reuse_p=None, save=SAVE)
+    # rvga_gaussian = RVGA_Gaussian(instance, POP_SIZE, lower_eps=LOWER_EPS, offspring_proportion=OFFSPRING_RATE,
+    #                               device=device, save=SAVE)
     # gaussian_df = rvga_gaussian.run_gm(GENERATIONS, run_number=run, gaussian_df=gaussian_df)
 
     # # CMA-ES
