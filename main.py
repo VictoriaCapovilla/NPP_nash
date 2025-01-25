@@ -76,9 +76,10 @@ for run in range(N_RUN):
 
     print('Run', run, 'of', N_RUN, 'complete', '\ntime:', time.time() - t)
 
-# vanilla_df.to_csv('/home/capovilla/Scrivania/NPP_nash/Results/vanilla_test', index=False)
-uniform_df.to_csv('/home/capovilla/Scrivania/NPP_nash/Results/uniform_test', index=False)
-# gaussian_df.to_csv('/home/capovilla/Scrivania/NPP_nash/Results/gaussian_test', index=False)
-# CMAESdf.to_csv('/home/capovilla/Scrivania/NPP_nash/Results/CMAEStest', index=False)
-# PSOdf.to_csv('/home/capovilla/Scrivania/NPP_nash/Results/PSOtest', index=False)
-# FSTPSOdf.to_csv('/home/capovilla/Scrivania/NPP_nash/Results/FSTPSOtest', index=False)
+if SAVE:
+    # vanilla_df.to_csv('/home/capovilla/Scrivania/NPP_nash/Results/vanilla_test', index=False)
+    uniform_df.to_csv('/home/capovilla/Scrivania/NPP_nash/Results/uniform_test', index=False)
+    # gaussian_df.to_csv('/home/capovilla/Scrivania/NPP_nash/Results/gaussian_test', index=False)
+    # CMAESdf.to_csv('/home/capovilla/Scrivania/NPP_nash/Results/CMAEStest', index=False)
+    # PSOdf.to_csv('/home/capovilla/Scrivania/NPP_nash/Results/PSOtest', index=False)
+    # FSTPSOdf.to_csv('/home/capovilla/Scrivania/NPP_nash/Results/FSTPSOtest', index=False)
