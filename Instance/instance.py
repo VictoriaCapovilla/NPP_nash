@@ -1,4 +1,3 @@
-# importing needed package
 import numpy as np
 
 
