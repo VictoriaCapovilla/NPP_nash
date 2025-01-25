@@ -8,7 +8,7 @@ from GA.Project.lower_level import LowerLevel
 
 class PSO:
 
-    def __init__(self, instance, c_soc = 1.49445, c_cog = 1.49445, w = 0.8, lower_eps=10**(-12), save=False):
+    def __init__(self, instance, c_soc=1.49445, c_cog=1.49445, w=0.8, lower_eps=10**(-12), save=False):
 
         self.save = save
         self.instance = instance
