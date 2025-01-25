@@ -49,6 +49,7 @@ class LowerTorch:
         self.m_new = torch.zeros_like(self.q)
         self.m_old = torch.zeros_like(self.q)
 
+        # probabilities
         self.p_old = None
 
         if self.save:
