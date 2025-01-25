@@ -108,7 +108,6 @@ class PSO:
                 PSOdf = self.update_csv(n_gen, swarm_size, max_velocity, run_number, PSOdf)
                 return PSOdf
 
-
     def update_csv(self, n_generations, swarm_size, max_velocity, run_number, PSOdf):
         # creating dataframe
         data = {
