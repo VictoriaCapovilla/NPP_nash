@@ -35,7 +35,7 @@ class GeneticAlgorithmTorch:
         # initialize the lower level
         self.lower = LowerTorch(self.instance, lower_eps, mat_size=self.mat_size, device=device, M=self.M, save=save)
 
-        # initialization
+        # population initialization
         self.population = torch.rand(size=(self.mat_size, self.n_paths), device=self.device) * self.M
         self.parents_idxs = torch.tensor([(i, j) for j in range(self.pop_size) for i in range(j + 1, self.pop_size)],
                                          device=self.device)
@@ -63,13 +63,18 @@ class GeneticAlgorithmTorch:
             self.times.append(time.time())
 
         for _ in range(n_gen):
-            # SELECT PARENTS
+            # SELECTION
+            # select parents
             self.parents = self.parents_idxs[torch.randperm(self.parents_idxs.shape[0],
                                                             device=self.device)[:self.n_children]]
             # booleans tensor
             self.mask[torch.randperm(self.mask.shape[0], device=self.device)[:self.mask.shape[0]//2]] = True
-            # mask will be assigned to parents[:,0] and the True position value of parents[:,0] will be crossed over
-            # with the complementary position value of parents[:,1] (corresponding to False)
+            # the values of parent 1 corresponding to the True value of mask will be crossed over
+            # with the complementary position value of parent 2 (corresponding to False value of mask)
+            # example:
+            # mask = [True, True, False, False, True]
+            # parent 1 = [1, 1, 1, 1, 1], parent 2 = [2, 2, 2, 2, 2]
+            # children = [1, 1, 2, 2, 1]
 
             # CROSSOVER
             self.population[self.pop_size:] = \
