@@ -18,9 +18,9 @@ np.random.seed(seed)
 random.seed(seed)
 torch.manual_seed(seed)
 
-PATHS = 20
-N_OD = 20
-POP_SIZE = 64
+PATHS = 5
+N_OD = 5
+POP_SIZE = 32
 GENERATIONS = 400
 LOWER_EPS = 10 ** (-4)
 OFFSPRING_RATE = 0.5
