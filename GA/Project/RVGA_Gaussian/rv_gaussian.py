@@ -32,7 +32,7 @@ class RVGA_Gaussian:
         # initialize the Lower Level
         self.lower = LowerTorch(self.instance, lower_eps, mat_size=self.mat_size, device=device, M=self.M, save=save)
 
-        # initialization
+        # population initialization
         self.population = torch.rand(size=(self.mat_size, self.n_paths), device=self.device) * self.M
         self.pop_idxs = torch.tensor([i for i in range(self.mat_size)], device=self.device)
 
