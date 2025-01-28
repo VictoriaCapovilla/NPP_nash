@@ -2,7 +2,7 @@
 This repository is created in order solve the optimization pricing problem at Nash equilibrium.
 
 Suppose to have a network with $n_{od}$ origin-destination (OD) pairs, across which an amount of $n_i, 1\le i\le n_{od},$ users for each OD want to travel. The users can decide to take the trip using one of the common $n_{paths}$ toll paths or by the only toll-free path available for each OD.  
-The problem can be modeled as a bilevel problem with an upper level consisting on a genetic algorithm, used to find the best costs **$T = (T_1, ..., T_{n_{paths}})$** to apply to the toll paths of the network and that maximize the following function
+The problem can be modeled as a bilevel problem with an upper level consisting on a evolution cycle, used to find the best costs **$T = (T_1, ..., T_{n_{paths}})$** to apply to the toll paths of the network and that maximize the following function
 
 $$\sum_{1\le j\le n_{paths}}\sum_{1\le i\le n_{od}} n_i p^j_i T_j,$$
 
