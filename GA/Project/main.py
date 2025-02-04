@@ -70,9 +70,9 @@ for run in range(N_RUN):
     # PSOdf = classic_PSO.run_PSO(GENERATIONS, swarm_size=POP_SIZE, run_number=run, PSOdf=PSOdf)
 
     # # fuzzy self-tuning PSO
-    # FST_PSO = FST_PSO(instance, lower_eps=LOWER_EPS, save=SAVE)
+    # FSTPSO = FST_PSO(instance, lower_eps=LOWER_EPS, save=SAVE)
     #
-    # FSTPSOdf = FST_PSO.run_FST_PSO(GENERATIONS, swarm_size=POP_SIZE, run_number=run, FSTPSOdf=FSTPSOdf)
+    # FSTPSOdf = FSTPSO.run_FST_PSO(GENERATIONS, swarm_size=POP_SIZE, run_number=run, FSTPSOdf=FSTPSOdf)
 
     print('Run', run, 'of', N_RUN, 'complete', '\ntime:', time.time() - t)
 
