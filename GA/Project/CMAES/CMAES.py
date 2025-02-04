@@ -51,13 +51,15 @@ class CMAES:
                 value = self.fitness_evaluation(x)
                 solutions.append((x, value))
             optimizer.tell(solutions)
-            ind, fit = min(solutions, key = lambda t: t[1])
+            ind, fit = min(solutions, key=lambda t: t[1])
             if verbose:
                 print(generation, fit)
             if self.save:
                 self.data_individuals.append(ind)
                 self.data_fit.append(float(np.abs(fit)))
                 self.times.append(time.time())
+        print("CMA-ES best solution:", ind)
+        print("Whose fitness is:", float(np.abs(fit)))
 
         if self.save:
             self.times = np.array(self.times)
