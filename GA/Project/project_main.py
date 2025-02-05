@@ -5,6 +5,7 @@ import torch
 
 import time
 
+from random_alg import GeneticAlgorithmRandom
 from GA.genetic_algorithm_torch import GeneticAlgorithmTorch
 from GA.Project.RVGA_Uniform.rv_uniform import RVGA_Uniform
 from GA.Project.RVGA_Gaussian.rv_gaussian import RVGA_Gaussian
@@ -33,6 +34,7 @@ instance = Instance(n_paths=PATHS, n_od=N_OD)
 N_RUN = 10
 SAVE = False
 
+random_df = None
 vanilla_df = None
 uniform_df = None
 gaussian_df = None
@@ -42,6 +44,10 @@ FSTPSOdf = None
 
 for run in range(N_RUN):
     t = time.time()
+    # # random algorithm
+    # randomGA = GeneticAlgorithmRandom(instance, POP_SIZE, lower_eps=LOWER_EPS, offspring_proportion=OFFSPRING_RATE,
+    #                                   device=device, save=SAVE)
+    # random_df = randomGA.run(GENERATIONS, run_number=run, random_df=random_df)
 
     # # vanilla genetic algorithm
     # vanilla = GeneticAlgorithmTorch(instance, POP_SIZE, lower_eps=LOWER_EPS,
@@ -77,6 +83,7 @@ for run in range(N_RUN):
     print('Run', run, 'of', N_RUN, 'complete', '\ntime:', time.time() - t)
 
 if SAVE:
+    # random_df.to_csv('/home/capovilla/Scrivania/NPP_nash/randomtest', index=False)
     # vanilla_df.to_csv('/home/capovilla/Scrivania/NPP_nash/Results/vanilla_test', index=False)
     uniform_df.to_csv('/home/capovilla/Scrivania/NPP_nash/Results/uniform_test', index=False)
     # gaussian_df.to_csv('/home/capovilla/Scrivania/NPP_nash/Results/gaussian_test', index=False)
