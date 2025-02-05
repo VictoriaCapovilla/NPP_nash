@@ -5,7 +5,7 @@ import torch
 
 import time
 
-from random_alg import GeneticAlgorithmRandom
+from GA.Project.Random.random_alg import GeneticAlgorithmRandom
 from GA.genetic_algorithm_torch import GeneticAlgorithmTorch
 from GA.Project.RVGA_Uniform.rv_uniform import RVGA_Uniform
 from GA.Project.RVGA_Gaussian.rv_gaussian import RVGA_Gaussian
