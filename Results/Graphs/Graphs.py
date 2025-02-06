@@ -22,9 +22,10 @@ FST = pd.read_csv(r'C:\Users\viki\Desktop\NPP\Results\20x20\64_400\FSTPSO')
 uni = pd.read_csv(r'C:\Users\viki\Desktop\NPP\Results\20x20\64_400\rv_uniform')
 gauss = pd.read_csv(r'C:\Users\viki\Desktop\NPP\Results\20x20\64_400\rv_gauss')
 vanilla = pd.read_csv(r'C:\Users\viki\Desktop\NPP\Results\20x20\64_400\torch')
+rdm = pd.read_csv(r'C:\Users\viki\Desktop\NPP\Results\20x20\64_400\rdm')
 
 # BEST CASE FOR EACH ALG
-for _ in [CMA, PSO, FST, uni, gauss, vanilla]:
+for _ in [CMA, PSO, FST, uni, gauss, vanilla, rdm]:
     a = _.loc[_.fitness == max(_.fitness)].index
     if _ is PSO:
         x = to_matrix(_.upper_time[a[0]])
@@ -36,11 +37,11 @@ for _ in [CMA, PSO, FST, uni, gauss, vanilla]:
 plt.title("Best cases\n20 paths, 20 ODs, pop_size = 64, gen = 400")
 plt.xlabel("Time")
 plt.ylabel("Fitness")
-plt.legend(['CMA-ES', 'PSO', 'FST-PSO', 'rv_uniform', 'rv_gauss', 'vanilla'])
+plt.legend(['CMA-ES', 'PSO', 'FST-PSO', 'rv_uniform', 'rv_gauss', 'vanilla', 'random'])
 plt.show()
 
 # WORST CASE FOR EACH ALG
-for _ in [CMA, PSO, FST, uni, gauss, vanilla]:
+for _ in [CMA, PSO, FST, uni, gauss, vanilla, rdm]:
     a = _.loc[_.fitness == min(_.fitness)].index
     if _ is PSO:
         x = to_matrix(_.upper_time[a[0]])
@@ -52,11 +53,11 @@ for _ in [CMA, PSO, FST, uni, gauss, vanilla]:
 plt.title("Worst cases\n20 paths, 20 ODs, pop_size = 64, gen = 400")
 plt.xlabel("Time")
 plt.ylabel("Fitness")
-plt.legend(['CMA-ES', 'PSO', 'FST-PSO', 'rv_uniform', 'rv_gauss', 'vanilla'])
+plt.legend(['CMA-ES', 'PSO', 'FST-PSO', 'rv_uniform', 'rv_gauss', 'vanilla', 'random'])
 plt.show()
 
 # MEANS FOR EACH ALG
-for _ in [CMA, PSO, FST, uni, gauss, vanilla]:
+for _ in [CMA, PSO, FST, uni, gauss, vanilla, rdm]:
     a = len(to_matrix(_.fit_update[0]))
     b = len(_.fitness)
     time = []
@@ -76,12 +77,12 @@ for _ in [CMA, PSO, FST, uni, gauss, vanilla]:
 plt.title("Mean\n20 paths, 20 ODs, pop_size = 64, gen = 400")
 plt.xlabel("Time")
 plt.ylabel("Fitness")
-plt.legend(['CMA-ES', 'PSO', 'FST-PSO', 'rv_uniform', 'rv_gauss', 'vanilla'])
+plt.legend(['CMA-ES', 'PSO', 'FST-PSO', 'rv_uniform', 'rv_gauss', 'vanilla', 'random'])
 plt.show()
 
 # BOX PLOTS
-plt.boxplot([CMA.fitness, PSO.fitness, FST.fitness, uni.fitness, gauss.fitness, vanilla.fitness])
-plt.xticks([1, 2, 3, 4, 5, 6], ['CMA-ES', 'PSO', 'FST-PSO', 'rv_uniform', 'rv_gauss', 'vanilla'])
+plt.boxplot([CMA.fitness, PSO.fitness, FST.fitness, uni.fitness, gauss.fitness, vanilla.fitness, rdm.fitness])
+plt.xticks([1, 2, 3, 4, 5, 6, 7], ['CMA-ES', 'PSO', 'FST-PSO', 'rv_uniform', 'rv_gauss', 'vanilla', 'random'])
 plt.ylabel('fitness')
 plt.title("20 paths, 20 ODs, pop_size = 64, gen = 400")
 plt.show()
@@ -93,8 +94,9 @@ FST.name = 'FST-PSO'
 uni.name = 'rv_uniform'
 gauss.name = 'rv_gaussian'
 vanilla.name = 'vanilla'
+rdm.name = 'random'
 
-for _ in [CMA, PSO, FST, uni, gauss, vanilla]:
+for _ in [CMA, PSO, FST, uni, gauss, vanilla, rdm]:
     if _ is PSO:
         for i in range(len(_.fitness)):
             x = to_matrix(_.upper_time[i])
