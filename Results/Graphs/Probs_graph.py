@@ -53,6 +53,6 @@ for ind in indexes:
     plt.plot(x, y, label=str(0))
 plt.title("Best " + str(k) + " probs update in one generation\n" + str(total_paths - 1) + "x" + str(od) + "_" +
           str(df.pop_size[0]) + ", lower_eps=" + str(df.eps[0]) + ", lower_iter=" + str(int(n_iter[0])))
-plt.xlabel("Iterations")
-plt.ylabel("Probabilities")
+plt.xlabel("Iteration")
+plt.ylabel("Probability")
 plt.show()
