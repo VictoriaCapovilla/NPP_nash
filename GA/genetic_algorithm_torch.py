@@ -2,7 +2,6 @@ import time
 
 import numpy as np
 import pandas as pd
-
 import torch
 
 from GA.lower_level_torch import LowerTorch
@@ -10,8 +9,8 @@ from GA.lower_level_torch import LowerTorch
 
 class GeneticAlgorithmTorch:
 
-    def __init__(self, instance, pop_size, offspring_proportion=0.5, mutation_rate=0.02, lower_eps=10**(-12),
-                 device=None, save=False):
+    def __init__(self, instance, pop_size, offspring_proportion=0.5, mutation_rate=0.02, lower_eps=10**(-12), lower_max_iter=30000,
+                 device=None, save=False, save_probs=False, reuse_probs=False):
 
         self.save = save
         self.device = device
@@ -33,7 +32,8 @@ class GeneticAlgorithmTorch:
                 1 + self.instance.alpha * (self.instance.n_users / self.instance.q_od) ** self.instance.beta)).max()
 
         # initialize the lower level
-        self.lower = LowerTorch(self.instance, lower_eps, mat_size=self.mat_size, device=device, M=self.M, save=save)
+        self.lower = LowerTorch(self.instance, lower_eps, mat_size=self.mat_size, device=device, M=self.M,
+                                lower_max_iter=lower_max_iter, save=save, save_probs=save_probs, reuse_probs=reuse_probs)
 
         # population initialization
         self.population = torch.rand(size=(self.mat_size, self.n_paths), device=self.device) * self.M
@@ -43,17 +43,9 @@ class GeneticAlgorithmTorch:
         self.parents = self.parents_idxs[torch.randperm(self.parents_idxs.shape[0],
                                                         device=self.device)[:self.n_children]]
 
-        # fitness evaluation
-        self.vals = torch.zeros(self.mat_size, device=self.device)
-        self.vals = self.lower.eval(self.population)
-
         if self.save:
             self.data_fit = []
-            self.data_fit.append(float(self.vals[np.argsort(-self.vals.to('cpu'))][0]))
-
             self.data_individuals = []
-            self.data_individuals.append(self.population[np.argsort(-self.vals.to('cpu'))][0].detach().cpu().numpy())
-
             self.times = []
 
         self.obj_val = 0
@@ -117,6 +109,7 @@ class GeneticAlgorithmTorch:
         # creating dataframe
         data = {
             'time': self.times[-1],
+            'case': str(self.n_paths) + '_' + str(self.instance.n_od) + '_' + str(self.pop_size),
             'upper_iter': n_generations,
             'fitness': float(self.data_fit[-1]),
             'best_individual': [self.data_individuals[-1]],

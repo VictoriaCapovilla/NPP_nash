@@ -8,10 +8,15 @@ from Instance.instance import Instance
 
 class LowerTorch:
 
-    def __init__(self, instance: Instance, eps, mat_size, device, M, save):
+    def __init__(self, instance: Instance, eps, mat_size, device, M, lower_max_iter, save, save_probs, reuse_probs):
+
+        self.device = device
 
         self.save = save
-        self.device = device
+        self.save_probs = save_probs
+        self.reuse_probs = reuse_probs
+
+        self.max_iter = lower_max_iter
 
         # network data
         self.n_od = instance.n_od
@@ -50,14 +55,18 @@ class LowerTorch:
         self.m_old = torch.zeros_like(self.q)
 
         # probabilities
-        self.p_old = None
+        if self.reuse_probs:
+            self.start_p = torch.ones((self.n_od, self.total_paths), device=self.device) / self.total_paths
+            self.start_p = torch.repeat_interleave(self.start_p.unsqueeze(0), repeats=self.mat_size, dim=0)
 
         if self.save:
             self.n_iter = []
             self.data_payoffs = []
-            self.data_probs = []
             self.data_time = []
             self.total_time = []
+
+        if self.save_probs:
+            self.data_probs = []
 
     def compute_probs(self, T):
         T = torch.repeat_interleave(T.unsqueeze(1), repeats=self.n_od, dim=1)
@@ -65,9 +74,11 @@ class LowerTorch:
         self.costs[:, :, : -1] = T
 
         # initial probabilities
-        p_old = torch.ones((self.n_od, self.total_paths), device=self.device) / self.total_paths
-        p_old = torch.repeat_interleave(p_old.unsqueeze(0), repeats=self.mat_size, dim=0)
-
+        if not self.reuse_probs:
+            p_old = torch.ones((self.n_od, self.total_paths), device=self.device) / self.total_paths
+            p_old = torch.repeat_interleave(p_old.unsqueeze(0), repeats=self.mat_size, dim=0)
+        else:
+            p_old = self.start_p
         p_new = p_old
 
         # payoff we want to maximize
@@ -82,7 +93,7 @@ class LowerTorch:
         # updating probabilities
         star = False
         iter = 0
-        while (torch.abs(p_old - p_new) > self.eps).any() or not star:
+        while ((torch.abs(p_old - p_new) * p_new.shape[2] > self.eps).any() and iter < self.max_iter) or not star:
             p_old = p_new
             self.m_old = self.m_new
             star = True
@@ -102,14 +113,22 @@ class LowerTorch:
                           1 + self.alpha * (torch.repeat_interleave(prod.sum(dim=1).unsqueeze(1), repeats=self.n_od,
                                                                     dim=1) / self.q) ** self.beta) - self.costs
             self.m_new[:, :, -1] = self.K - self.travel_time[:, :, -1] * (
-                        1 + self.alpha * (prod[:, :, -1] / self.q[:, :, -1]) ** self.beta)
+                                    1 + self.alpha * (prod[:, :, -1] / self.q[:, :, -1]) ** self.beta)
 
             iter += 1
+            if self.save_probs:
+                self.data_probs.append((p_old[0].detach().cpu()).tolist())
+        if self.save_probs:
+            self.data_probs = self.data_probs[-iter:]
+            pp = np.array(self.data_probs)
+            np.save( 'test', pp)
 
         if self.save:
             self.n_iter.append(iter)
             self.data_payoffs.append(self.m_new[0].detach().cpu().numpy())
 
+        if self.reuse_probs:
+            self.start_p = p_old
         return p_old
 
     def compute_fitness(self, probs):
@@ -123,7 +142,6 @@ class LowerTorch:
         fit = self.compute_fitness(probs)
 
         if self.save:
-            self.data_probs.append(probs[0].detach().cpu().numpy())
             self.data_time.append(time.time() - t)
             self.total_time.append(time.time())
         return fit
