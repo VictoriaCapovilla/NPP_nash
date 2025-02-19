@@ -9,8 +9,7 @@ from GA.Project.lower_level import LowerLevel
 
 
 class CMAES:
-
-    def __init__(self, instance, lower_eps=10**(-12), save=False):
+    def __init__(self, instance, lower_eps=10**(-12), lower_max_iter=30000, save=False):
 
         self.save = save
         self.instance = instance
@@ -24,7 +23,7 @@ class CMAES:
                 1 + self.instance.alpha * (self.instance.n_users / self.instance.q_od) ** self.instance.beta)).max()
 
         # initialize the Lower Level
-        self.lower = LowerLevel(self.instance, lower_eps, M=self.M)
+        self.lower = LowerLevel(self.instance, lower_eps, M=self.M, lower_max_iter=lower_max_iter)
 
         if self.save:
             self.times = []
@@ -33,6 +32,7 @@ class CMAES:
 
 
     def fitness_evaluation(self, individual):
+
         # adapting the individual to Lower Level requirements
         individual = np.transpose(np.reshape(np.repeat(np.array(individual), repeats=self.n_od),
                                              (self.n_od, self.n_paths)))

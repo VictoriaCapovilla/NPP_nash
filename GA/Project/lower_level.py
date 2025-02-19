@@ -7,7 +7,7 @@ from Instance.instance import Instance
 
 class LowerLevel:
 
-    def __init__(self, instance: Instance, eps, M):
+    def __init__(self, instance: Instance, eps, M, lower_max_iter):
 
         # network data
         self.n_od = instance.n_od
@@ -27,6 +27,8 @@ class LowerLevel:
         self.alpha = instance.alpha
         self.beta = instance.beta
         self.eps = eps
+
+        self.max_iter = lower_max_iter
 
         self.K = (self.travel_time[:, :] * (1 + self.alpha * (self.n_users[:, 0].sum() / self.q[:, :])
                                             ** self.beta)).max() + M
@@ -57,7 +59,7 @@ class LowerLevel:
         self.m_new = self.m_old
 
         star = False
-        while (np.abs(p_old - p_new) > self.eps).any() or not star:
+        while ((np.abs(p_old - p_new) * p_new.shape[1] > self.eps).any() and iter < self.max_iter)or not star:
             p_old = p_new
             self.m_old = self.m_new
             star = True
@@ -74,7 +76,8 @@ class LowerLevel:
 
             # updated payoff
             self.m_new = (self.K - self.travel_time * (
-                    1 + self.alpha * (np.repeat(prod.sum(axis=0), repeats=self.n_od).reshape( -1, self.n_od).T / self.q) ** self.beta) - self.costs)
+                    1 + self.alpha * (np.repeat(prod.sum(axis=0), repeats=self.n_od).reshape( -1, self.n_od).T / self.q)
+                    ** self.beta) - self.costs)
             self.m_new[:, -1] = self.K - self.travel_time[:, -1] * (
                         1 + self.alpha * (prod[:, -1] / self.q[:, -1]) ** self.beta)
         return p_old

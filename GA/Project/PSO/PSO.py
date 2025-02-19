@@ -8,7 +8,7 @@ from GA.Project.lower_level import LowerLevel
 
 class PSO:
 
-    def __init__(self, instance, c_soc=1.49445, c_cog=1.49445, w=0.8, lower_eps=10**(-12), save=False):
+    def __init__(self, instance, c_soc=1.49445, c_cog=1.49445, w=0.8, lower_eps=10**(-12), lower_max_iter=30000, save=False):
 
         self.save = save
         self.instance = instance
@@ -22,7 +22,7 @@ class PSO:
                 1 + self.instance.alpha * (self.instance.n_users / self.instance.q_od) ** self.instance.beta)).max()
 
         # initialize the Lower Level
-        self.lower = LowerLevel(self.instance, lower_eps, M=self.M)
+        self.lower = LowerLevel(self.instance, lower_eps, M=self.M, lower_max_iter=lower_max_iter)
 
         # parameters
         self.c_soc = c_soc
