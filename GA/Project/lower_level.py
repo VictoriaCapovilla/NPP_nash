@@ -59,7 +59,8 @@ class LowerLevel:
         self.m_new = self.m_old
 
         star = False
-        while ((np.abs(p_old - p_new) * p_new.shape[1] > self.eps).any() and iter < self.max_iter)or not star:
+        iter = 0
+        while ((np.abs(p_old - p_new) * p_new.shape[1] > self.eps).any() and iter < self.max_iter) or not star:
             p_old = p_new
             self.m_old = self.m_new
             star = True
@@ -80,6 +81,7 @@ class LowerLevel:
                     ** self.beta) - self.costs)
             self.m_new[:, -1] = self.K - self.travel_time[:, -1] * (
                         1 + self.alpha * (prod[:, -1] / self.q[:, -1]) ** self.beta)
+            iter += 1
         return p_old
 
     def compute_fitness(self, probs):
