@@ -16,13 +16,13 @@ def to_matrix(a):
     return np.array(ast.literal_eval(cleaned_string))
 
 
-CMA = pd.read_csv(r'C:\Users\viki\Desktop\NPP\Results\20x20\64_400\CMA')
-PSO = pd.read_csv(r'C:\Users\viki\Desktop\NPP\Results\20x20\64_400\PSO')
-FST = pd.read_csv(r'C:\Users\viki\Desktop\NPP\Results\20x20\64_400\FSTPSO')
-uni = pd.read_csv(r'C:\Users\viki\Desktop\NPP\Results\20x20\64_400\rv_uniform')
-gauss = pd.read_csv(r'C:\Users\viki\Desktop\NPP\Results\20x20\64_400\rv_gauss')
-vanilla = pd.read_csv(r'C:\Users\viki\Desktop\NPP\Results\20x20\64_400\torch')
-rdm = pd.read_csv(r'C:\Users\viki\Desktop\NPP\Results\20x20\64_400\rdm')
+CMA = pd.read_csv('/home/capovilla/Scrivania/NPP_nash/Results/GMO/Instances/CMAEStest')
+PSO = pd.read_csv('/home/capovilla/Scrivania/NPP_nash/Results/GMO/Instances/PSOtest')
+FST = pd.read_csv('/home/capovilla/Scrivania/NPP_nash/Results/GMO/Instances/FSTPSOtest')
+uni = pd.read_csv('/home/capovilla/Scrivania/NPP_nash/Results/GMO/Instances/uniform_test')
+gauss = pd.read_csv('/home/capovilla/Scrivania/NPP_nash/Results/GMO/Instances/gaussian_test')
+vanilla = pd.read_csv('/home/capovilla/Scrivania/NPP_nash/Results/GMO/Instances/vanilla_test')
+rdm = pd.read_csv('/home/capovilla/Scrivania/NPP_nash/Results/GMO/Instances/randomtest')
 
 FST.rename({'swarm_size': 'pop_size'}, axis=1, inplace=True)
 PSO.rename({'swarm_size': 'pop_size'}, axis=1, inplace=True)
