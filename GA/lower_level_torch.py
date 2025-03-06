@@ -8,7 +8,7 @@ from Instance.instance import Instance
 
 class LowerTorch:
 
-    def __init__(self, instance: Instance, eps, mat_size, device, M, lower_max_iter, save, save_probs, reuse_probs):
+    def __init__(self, instance: Instance, eps, mat_size, device, M, lower_max_iter, save, save_probs=False, reuse_probs=False):
 
         self.device = device
 
@@ -51,8 +51,7 @@ class LowerTorch:
                                                ** self.beta)).max() + M
 
         # payoff matrix
-        self.m_new = torch.zeros_like(self.q)
-        self.m_old = torch.zeros_like(self.q)
+        self.m = torch.zeros_like(self.q)
 
         # probabilities
         if self.reuse_probs:
@@ -83,36 +82,34 @@ class LowerTorch:
 
         # payoff we want to maximize
         prod = self.n_users * p_new
-        self.m_old = self.K - self.travel_time * (
+        self.m = self.K - self.travel_time * (
                       1 + self.alpha * (torch.repeat_interleave(prod.sum(dim=1).unsqueeze(1), repeats=self.n_od, dim=1)
                                         / self.q) ** self.beta) - self.costs
-        self.m_old[:, :, -1] = self.K - self.travel_time[:, :, -1] * (
+        self.m[:, :, -1] = self.K - self.travel_time[:, :, -1] * (
                                 1 + self.alpha * (prod[:, :, -1] / self.q[:, :, -1]) ** self.beta)
-        self.m_new = self.m_old
 
         # updating probabilities
         star = False
         iter = 0
         while ((torch.abs(p_old - p_new) * p_new.shape[2] > self.eps).any() and iter < self.max_iter) or not star:
             p_old = p_new
-            self.m_old = self.m_new
             star = True
 
             # average payoff
-            m_average = (self.m_old * p_old).sum(dim=2).unsqueeze(2)
+            m_average = (self.m * p_old).sum(dim=2).unsqueeze(2)
             m_average = torch.repeat_interleave(m_average, repeats=p_old.shape[2], dim=2)
 
             # updated probabilities
-            p_new = p_old * self.m_old / m_average
+            p_new = p_old * self.m / m_average
 
             # users flow on each path
             prod = self.n_users * p_new
 
             # updated payoff
-            self.m_new = self.K - self.travel_time * (
+            self.m = self.K - self.travel_time * (
                           1 + self.alpha * (torch.repeat_interleave(prod.sum(dim=1).unsqueeze(1), repeats=self.n_od,
                                                                     dim=1) / self.q) ** self.beta) - self.costs
-            self.m_new[:, :, -1] = self.K - self.travel_time[:, :, -1] * (
+            self.m[:, :, -1] = self.K - self.travel_time[:, :, -1] * (
                                     1 + self.alpha * (prod[:, :, -1] / self.q[:, :, -1]) ** self.beta)
 
             iter += 1
@@ -125,7 +122,7 @@ class LowerTorch:
 
         if self.save:
             self.n_iter.append(iter)
-            self.data_payoffs.append(self.m_new[0].detach().cpu().numpy())
+            self.data_payoffs.append(self.m[0].detach().cpu().numpy())
 
         if self.reuse_probs:
             self.start_p = p_old
