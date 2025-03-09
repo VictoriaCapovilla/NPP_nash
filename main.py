@@ -22,10 +22,10 @@ LOWER_MAX_ITER = 30000
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-N_RUN = 10
+N_RUN = 1
 
 SAVE = True
-SAVE_PROBS = False
+SAVE_PROBS = True
 VERBOSE = False
 REUSE_PROBS = False
 
@@ -33,13 +33,13 @@ vanilla_df = None
 
 for paths in [20, 56, 90]:
     for n_od in [20, 56, 90]:
-        instance = Instance(n_paths=paths, n_od=n_od, alpha=0.15, beta=4)
+        instance = Instance(n_paths=paths, n_od=n_od)
         for run in range(N_RUN):
             t = time.time()
 
             # vanilla genetic algorithm
-            vanilla = GeneticAlgorithmTorch(instance, POP_SIZE, lower_eps=LOWER_EPS,
-                                            offspring_proportion=OFFSPRING_RATE, mutation_rate=MUTATION_RATE, lower_max_iter=LOWER_MAX_ITER,
+            vanilla = GeneticAlgorithmTorch(instance, POP_SIZE, lower_eps=LOWER_EPS, lower_max_iter=LOWER_MAX_ITER,
+                                            offspring_proportion=OFFSPRING_RATE, mutation_rate=MUTATION_RATE,
                                             device=device, save=SAVE, save_probs=SAVE_PROBS, reuse_probs=REUSE_PROBS)
             vanilla_df = vanilla.run(GENERATIONS, run_number=run, vanilla_df=vanilla_df, verbose=VERBOSE)
 

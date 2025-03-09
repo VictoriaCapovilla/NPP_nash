@@ -4,7 +4,7 @@ import numpy as np
 class Instance:
 
     def __init__(self, n_paths, n_od, users_range=(50, 200),
-                 od_transfer_range=(20, 30),  p_transfer_range=(5, 10), alpha=1, beta=1.2):
+                 od_transfer_range=(20, 30),  p_transfer_range=(5, 10), alpha=0.4, beta=0.8):
         # network data
         self.n_paths = n_paths
         self.n_od = n_od
