@@ -13,8 +13,8 @@ np.random.seed(seed)
 random.seed(seed)
 torch.manual_seed(seed)
 
-POP_SIZE = 128 # 128 256 512
-GENERATIONS = 10  # 10 50 100
+POP_SIZE = 512 # 128 256 512
+GENERATIONS = 100  # 10 50 100
 LOWER_EPS = 10 ** (-3)
 OFFSPRING_RATE = 0.5
 MUTATION_RATE = 0.02
@@ -24,15 +24,15 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 N_RUN = 1
 
-SAVE = True
-SAVE_PROBS = True
-VERBOSE = False
+SAVE = False
+SAVE_PROBS = False
+VERBOSE = True
 REUSE_PROBS = False
 
 vanilla_df = None
 
-for paths in [20, 56, 90]:
-    for n_od in [20, 56, 90]:
+for paths in [10, 20, 20]:
+    for n_od in [10, 20, 30]:
         instance = Instance(n_paths=paths, n_od=n_od)
         for run in range(N_RUN):
             t = time.time()

@@ -61,8 +61,8 @@ class LowerTorch:
         if self.save:
             self.n_iter = []
             self.data_payoffs = []
-            self.data_time = []
-            self.total_time = []
+        self.data_time = []
+        self.total_time = []
 
         if self.save_probs:
             self.data_probs = []
@@ -138,7 +138,7 @@ class LowerTorch:
         probs = self.compute_probs(T)
         fit = self.compute_fitness(probs)
 
-        if self.save:
-            self.data_time.append(time.time() - t)
-            self.total_time.append(time.time())
+
+        self.data_time.append(time.time() - t)
+        self.total_time.append(time.time())
         return fit
