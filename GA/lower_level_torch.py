@@ -138,7 +138,6 @@ class LowerTorch:
         probs = self.compute_probs(T)
         fit = self.compute_fitness(probs)
 
-
         self.data_time.append(time.time() - t)
         self.total_time.append(time.time())
         return fit
